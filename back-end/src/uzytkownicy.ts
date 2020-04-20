@@ -36,7 +36,8 @@ class Uzytkownicy {
 
     DB.executeSQLSanitize(query, res, result => {
       let size: string = result.length;
-        Log(0, "Uzytkownicsy login failed");
+      if (result.length < 1){
+        Log(0, "Uzytkownicy login failed");
         return res.status(401).json({
           message: "Login failed"
         });

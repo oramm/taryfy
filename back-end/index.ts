@@ -97,5 +97,5 @@ app.use((err, req, res) => {
 });
 
 app.listen(port, () => {
-  Log(0, "Taryfy back-end listening on port: ", port);
+  Log(0, "Wnioski Taryfowe back-end server is listening on port: ", port);
 });

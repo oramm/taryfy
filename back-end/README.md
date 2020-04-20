@@ -9,16 +9,16 @@ Pobierz pliki z repozytorum na dysk lokalny.
 
 Przejdz do folderu `./back-end`.
 
-W celu instalacji niezbędnych pakietów uruchom w terminalu komendę:
+Zainstaluj zależne pakiedy komendę:
 `npm i`
 
 ## Uruchomienie
 
-Będąc w folderze `./back-end` uruchom komendę:
+W folderze `./back-end` uruchom komendę:
 `npm start`
 
 Poprawnie uruchomiony serwer wyświetli komunikat:
-`Taryfy back-end listening on port: [ 5000 ]`
+`Wnioski Taryfowe back-end server is listening on port: [ 5000 ]`
 
 ## Utworzenie bazy
 
