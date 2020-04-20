@@ -25,7 +25,7 @@ class Uzytkownicy {
       req.body.wniosek_id +
       "WHERE id=" +
       req.body.id;
-    DB.ececuteSQL(query, result => {});
+    DB.executeSQL(query, result => {});
   }
 
   static login(res, req) {
@@ -34,10 +34,9 @@ class Uzytkownicy {
       "SELECT * from uzytkownicy where nazwa =" +
       connection.escape(req.body.nazwa);
 
-    DB.ececuteSQLSanitize(query, res, result => {
+    DB.executeSQLSanitize(query, res, result => {
       let size: string = result.length;
-      if (result.length<1){
-      //if (Number(size) == 0) {
+        Log(0, "Uzytkownicsy login failed");
         return res.status(401).json({
           message: "Login failed"
         });
@@ -54,8 +53,9 @@ class Uzytkownicy {
         } else {
           const token = jwt.sign(
             {
-              nazwa: result[0].nazwa,
-              id: result[0].id
+              klient_id: result[0].klient_id,
+              id: result[0].id,
+              nazwa: result[0].nazwa
             },
             //todo: it is used in indes.ts, move it to one place
             "g6asdfbw4yhdfvqwe4yfg2365burthff6ui47irtfdgwgh45wv4hsdf0zq1x08lqz34r54brwer4ddwv54t67uhe5rtv",
@@ -77,7 +77,7 @@ class Uzytkownicy {
       "SELECT * from uzytkownicy where nazwa =" +
       connection.escape(req.body.nazwa);
 
-    DB.ececuteSQLSanitize(query, res, result => {
+    DB.executeSQLSanitize(query, res, result => {
       let size: string = result.length;
       if (Number(size) > 0) {
         //error, user already exists
@@ -93,7 +93,10 @@ class Uzytkownicy {
             });
           } else {
             let query = (connection: any) =>
-              "INSERT INTO uzytkownicy (nazwa, haslo) SELECT " +
+              "INSERT INTO uzytkownicy (klient_id, nazwa, haslo) SELECT  \
+              (SELECT id FROM klienci WHERE nazwa LIKE " +
+              connection.escape(req.body.klient_id) +
+              ")," +
               connection.escape(req.body.nazwa) +
               "," +
               connection.escape(hash) +
@@ -101,7 +104,7 @@ class Uzytkownicy {
               connection.escape(req.body.nazwa) +
               ");";
             req.body.wniosek_id;
-            DB.ececuteSQLSanitize(query, res, result => {
+            DB.executeSQLSanitize(query, res, result => {
               Log(0,result);
               res.status(201).json({
                 message: "User created"
@@ -118,4 +121,6 @@ class Uzytkownicy {
   }
 }
 
-export { router as uzytkownicyRouter };
+let uzytkownicyInsert = Uzytkownicy.insert;
+
+export { router as uzytkownicyRouter, uzytkownicyInsert };

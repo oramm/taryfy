@@ -43,7 +43,7 @@ export default class Menu020 extends Component<Menu020Props, Menu020State> {
 
   render() {
     return (
-      <MDBBtnGroup style={{"margin-top": "60px"}}>
+      <MDBBtnGroup style={{"marginTop": "60px"}}>
         {this.state.menu_items.map((name, index) => (
           <MDBBox key={index}>
             <MDBBtn

@@ -27,7 +27,7 @@ class Zalozenia {
       "); \
       SELECT * FROM zalozenia WHERE wniosek_id=" +
       req.body.wniosek_id;
-    DB.ececuteSQL(query, result => {
+    DB.executeSQL(query, result => {
       res.send(result[1]);
     });
   }
@@ -36,7 +36,7 @@ class Zalozenia {
     Log(0,'Zalozenia Select received req.body=', req.body);
     let query =
       "SELECT * from zalozenia where wniosek_id=" + req.body.wniosek_id;
-    DB.ececuteSQL(query, result => {
+    DB.executeSQL(query, result => {
       res.send(result);
     });
   }
@@ -63,7 +63,7 @@ class Zalozenia {
       req.body.marza_zysku_3 +
       " WHERE `id`=" +
       req.body.id;
-    DB.ececuteSQL(query, result => {
+    DB.executeSQL(query, result => {
       res.send(result);
     });
   }

@@ -20,39 +20,42 @@ router.post("/delete", (req, res) => {
 class RodzajeKosztow {
   static Select(res, req) {
     let query =
-      "SELECT * from rodzaje_kosztow WHERE wniosek_id=" + req.body.wniosek_id;
-    DB.ececuteSQL(query, result => {
+      "SELECT * from koszty_rodzaje WHERE wniosek_id=" + req.body.wniosek_id +
+      " AND typ_id="+req.body.typ_id;
+    DB.executeSQL(query, result => {
       res.send(result);
     });
   }
 
   static Insert(res, req) {
     let query = (connection: any) =>
-      "INSERT INTO rodzaje_kosztow(wniosek_id, nazwa) VALUES (" +
+      "INSERT INTO koszty_rodzaje(wniosek_id, typ_id, nazwa) VALUES (" +
       req.body.wniosek_id +
       "," +
+      req.body.typ_id +
+      "," +      
       connection.escape(req.body.nazwa) +
       ")";
-    DB.ececuteSQLSanitize(query, res, result => {
-      console.dir("Insert rodzaje_kosztow, id:", result.insertId);
+    DB.executeSQLSanitize(query, res, result => {
+      console.dir("Insert koszty_rodzaje, id:", result.insertId);
       res.send(result);
     });
   }
 
   static Update(res, req) {
     let query = (connection: any) =>
-      "UPDATE rodzaje_kosztow SET nazwa=" +
+      "UPDATE koszty_rodzaje SET nazwa=" +
       connection.escape(req.body.nazwa) +
       " WHERE id=" +
       req.body.id;
-    DB.ececuteSQLSanitize(query, res, result => {
+    DB.executeSQLSanitize(query, res, result => {
       res.send(result);
     });
   }
 
   static Delete(res, req) {
-    let query = "DELETE FROM rodzaje_kosztow WHERE id = " + req.body.id;
-    DB.ececuteSQL(query, result => {
+    let query = "DELETE FROM koszty_rodzaje WHERE id = " + req.body.id;
+    DB.executeSQL(query, result => {
       res.send(result);
     });
   }

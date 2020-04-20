@@ -1,12 +1,12 @@
-import { DB } from "./db_util";
-import { RodzajeKosztow } from "./rodzaje_kosztow";
-import {Log} from "./log"
+import { RodzajeKosztow } from "./koszty_rodzaje";
+import { Log } from "./log";
 
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 export class Koszty {
   static async updateSpreadsheet(
-    res: { send: (arg0: any) => void },
+    // res: { send: (arg0: any) => void },
+    res: any,
     req: { body: { nazwa: any; id: string } }
   ) {
     const doc = new GoogleSpreadsheet(
@@ -15,30 +15,32 @@ export class Koszty {
     await doc.useServiceAccountAuth(require("./creds-from-google.json"));
 
     await doc.loadInfo(); // loads document properties and worksheets
-    Log(0,doc.title);
+    Log(0, doc.title);
 
     const sheet = doc.sheetsByIndex[0]; // or use doc.sheetsById[id]
-    Log(0,"title:", sheet.title);
-    Log(0,"sheet:", sheet);
+    Log(0, "updateSpreadsheet title:", sheet.title);
+    Log(0, "updateSpreadsheet sheet:", sheet);
 
     const rows = await sheet.getRows();
-    Log(0,"rows.length:", rows.length);
+    Log(0, "updateSpreadsheet rows.length:", rows.length);
 
     for (let i: number = rows.length - 1; i >= 0; i--) {
-      Log(0,"rows[i]:", i);
+      Log(0, "updateSpreadsheet rows[i]:", i);
       await rows[i].del();
     }
 
     RodzajeKosztow.Select(
       {
-        send: async (res: any) => {
-          let rodzaje_kosztow: string[][] = [];
-          res.map(async item => {
-             let row: string[] =[item.nazwa];
-            rodzaje_kosztow.push(row);
+        send: async (select_res: any) => {
+          let koszty_rodzaje: string[][] = [];
+          await select_res.map(async (item) => {
+            let row: string[] = [item.nazwa];
+            koszty_rodzaje.push(row);
           });
-          Log(0,"rodzaje_kosztow:", rodzaje_kosztow);          
-          await sheet.addRows(rodzaje_kosztow);
+          Log(0, "updateSpreadsheet koszty_rodzaje:", koszty_rodzaje);
+          let ret = await sheet.addRows(koszty_rodzaje);
+          Log(0, "updateSpreadsheet ret:", ret);
+          res.status(200).send("Spreadsheet updated");
         }
       },
       req

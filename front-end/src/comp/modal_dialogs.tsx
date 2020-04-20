@@ -6,105 +6,173 @@ import {
   MDBModalBody,
   MDBInput,
   MDBModalFooter,
-  MDBBtn
+  MDBBtn,
 } from "mdbreact";
 
+export type ModalDialogs = {
+  nazwaOn: (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => void;
+  usunOn: (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => void;
+  errorOn: (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => void;
+  wTokuOn: () => void;
+  wTokuOff: () => void;
+};
+
 type Props = {
-  set_callbacks_callback: (dailogs: ModalDialogs)=>void;
+  set_modal_dialog_callbacks: (dialogs: ModalDialogs) => void;
 };
 
 type State = {
   modal_label: string;
   modal_nazwa: string;
-  modal_nazwa_toggle: boolean;
   modal_action: (name: string) => void;
-  modal_usun_toggle: boolean;
+  modal_nazwa_on: boolean;
+  modal_usun_on: boolean;
   modal_usun_disabled: boolean;
-  modal_bottom_toggle: boolean;
-  modal_bottom_label: string;
-  modal_error_toggle: boolean;
+  modal_w_toku_count: number;
+  modal_w_toku_on: boolean;
+  modal_error_on: boolean;
 };
 
-export type OnModal = (label: string, nazwa: string, action: (nazwa: string) => void) => void;
+// type OnModal = (
+//   label: string,
+//   nazwa: string,
+//   action: (nazwa: string) => void
+// ) => void;
 
-export default class ModalDialogs extends Component<Props, State> {
+class ModalDialogsComp extends Component<Props, State> {
   state: State = {
     modal_label: "",
     modal_nazwa: "",
-    modal_nazwa_toggle: false,
+    modal_nazwa_on: false,
     modal_action: () => {},
-    modal_usun_toggle: false,
+    modal_usun_on: false,
     modal_usun_disabled: true,
-    modal_bottom_toggle: false,
-    modal_bottom_label: "",
-    modal_error_toggle: false
+    modal_w_toku_count: 0,
+    modal_w_toku_on: false,
+    modal_error_on: false,
   };
 
   constructor(props: Props) {
     super(props);
-    props.set_callbacks_callback(this);
+    let dialogs: ModalDialogs = {
+      nazwaOn: this.nazwaOn,
+      usunOn: this.usunOn,
+      errorOn: this.errorOn,
+      wTokuOn: this.wTokuOn,
+      wTokuOff: this.wTokuOff,
+    };
+    props.set_modal_dialog_callbacks(dialogs);
   }
 
-  public modalNazwaOn = (label: string, nazwa: string, action: (name: string) => void) => {
+  public nazwaOn = (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => {
     console.log("modalNazwaOn label: ", label);
     console.log("modalNazwaOn nazwa: ", nazwa);
     this.setState({
       modal_label: label,
       modal_nazwa: nazwa,
-      modal_nazwa_toggle: true,
-      modal_action: action
+      modal_nazwa_on: true,
+      modal_action: action,
     });
   };
-
-  modalNazwaOff = () => {
+  nazwaOff = () => {
     this.setState({
-      modal_nazwa_toggle: false
+      modal_nazwa_on: false,
     });
   };
 
-  public modalUsunOn = (label: string, nazwa: string, action: (name: string) => void) => {
+  public usunOn = (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => {
     this.setState({
       modal_label: label,
       modal_nazwa: nazwa,
-      modal_usun_toggle: true,
+      modal_usun_on: true,
       modal_usun_disabled: true,
-      modal_action: action
+      modal_action: action,
+    });
+  };
+  usunOff = () => {
+    this.setState({
+      modal_usun_on: false,
     });
   };
 
-  modalUsunOff = () => {
-    this.setState({
-      modal_usun_toggle: false
-    });
+  public wTokuOn = async () => {
+    console.log(
+      "wTokuOn this.state.modal_w_toku_count:",
+      this.state.modal_w_toku_count
+    );
+    await this.setState(
+      {
+        modal_w_toku_count: this.state.modal_w_toku_count + 1,
+      },
+      () =>
+        this.setState({
+          modal_w_toku_on: true,
+        })
+    );
   };
 
-  public modalWTokuToggle = () => {
-    this.setState({
-      modal_bottom_toggle: !this.state.modal_bottom_toggle
-    });
+  public wTokuOff = async () => {
+    console.log(
+      "wTokuOff this.state.modal_w_toku_count:",
+      this.state.modal_w_toku_count
+    );
+    //todo: is it thread safe?
+    this.state.modal_w_toku_count > 0 &&
+      await this.setState(
+        {
+          modal_w_toku_count: this.state.modal_w_toku_count - 1,
+        },
+        () => {
+          if (this.state.modal_w_toku_count === 0)
+            this.setState({
+              modal_w_toku_on: false,
+            });
+        }
+      );
   };
-  
-  public modalErrorOn = (label: string, nazwa: string, action: (name: string) => void) => {
+
+  public errorOn = (
+    label: string,
+    nazwa: string,
+    action: (name: string) => void
+  ) => {
     console.log("modalErrorOn label: ", label);
     this.setState({
       modal_label: label,
-      modal_error_toggle: true
+      modal_error_on: true,
     });
   };
 
-  modalErrorOff = () => {
+  errorOff = () => {
     this.setState({
-      modal_error_toggle: false
+      modal_error_on: false,
     });
   };
 
   modalNazwa() {
     return (
-      <MDBModal
-        isOpen={this.state.modal_nazwa_toggle}
-        toggle={this.modalNazwaOff}
-      >
-        <MDBModalHeader toggle={this.modalNazwaOff}>
+      <MDBModal isOpen={this.state.modal_nazwa_on} toggle={this.nazwaOff}>
+        <MDBModalHeader toggle={this.nazwaOff}>
           {this.state.modal_label}
         </MDBModalHeader>
         <MDBModalBody>
@@ -112,20 +180,20 @@ export default class ModalDialogs extends Component<Props, State> {
             type="text"
             label="Podaj nazwę"
             value={this.state.modal_nazwa}
-            onChange={event => {
+            onChange={(event) => {
               const { value } = event.currentTarget;
               this.setState({ modal_nazwa: value });
             }}
           ></MDBInput>{" "}
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.modalNazwaOff}>
+          <MDBBtn color="secondary" onClick={this.nazwaOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
             color="primary"
             onClick={() => {
-              this.modalNazwaOff();
+              this.nazwaOff();
               this.state.modal_action(this.state.modal_nazwa);
             }}
           >
@@ -138,11 +206,8 @@ export default class ModalDialogs extends Component<Props, State> {
 
   modalUsun() {
     return (
-      <MDBModal
-        isOpen={this.state.modal_usun_toggle}
-        toggle={this.modalUsunOff}
-      >
-        <MDBModalHeader toggle={this.modalUsunOff}>
+      <MDBModal isOpen={this.state.modal_usun_on} toggle={this.usunOff}>
+        <MDBModalHeader toggle={this.usunOff}>
           {this.state.modal_label}
         </MDBModalHeader>
         <MDBModalBody>
@@ -152,20 +217,20 @@ export default class ModalDialogs extends Component<Props, State> {
               label="Usunięcie wniosku oznacza utratę wszystkich powiązanych danych."
               onChange={() => {
                 this.setState({
-                  modal_usun_disabled: !this.state.modal_usun_disabled
+                  modal_usun_disabled: !this.state.modal_usun_disabled,
                 });
               }}
             />
           </div>
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.modalUsunOff}>
+          <MDBBtn color="secondary" onClick={this.usunOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
             color="primary"
             onClick={() => {
-              this.modalUsunOff();
+              this.usunOff();
               this.state.modal_action(this.state.modal_nazwa);
             }}
             disabled={this.state.modal_usun_disabled}
@@ -180,14 +245,12 @@ export default class ModalDialogs extends Component<Props, State> {
   modalWToku() {
     return (
       <MDBModal
-        isOpen={this.state.modal_bottom_toggle}
-        toggle={this.modalWTokuToggle}
-        frame
-        position="bottom"
+        isOpen={this.state.modal_w_toku_on}
+        // toggle={this.wTokuOff}
       >
         <MDBModalBody className="text-center">
-          Lorem ipsum dolor sit amet
-          {this.state.modal_label}
+          Operacja w toku
+          {/* {this.state.modal_label} */}
         </MDBModalBody>
       </MDBModal>
     );
@@ -195,18 +258,11 @@ export default class ModalDialogs extends Component<Props, State> {
 
   modalError() {
     return (
-      <MDBModal
-        isOpen={this.state.modal_error_toggle}
-        toggle={this.modalErrorOff}
-      >
-        <MDBModalHeader toggle={this.modalErrorOff}>
-          Błąd:
-        </MDBModalHeader>
-        <MDBModalBody>
-        {this.state.modal_label}
-        </MDBModalBody>
+      <MDBModal isOpen={this.state.modal_error_on} toggle={this.errorOff}>
+        <MDBModalHeader toggle={this.errorOff}>Błąd:</MDBModalHeader>
+        <MDBModalBody>{this.state.modal_label}</MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.modalErrorOff}>
+          <MDBBtn color="secondary" onClick={this.errorOff}>
             Zamknij
           </MDBBtn>
         </MDBModalFooter>
@@ -217,11 +273,31 @@ export default class ModalDialogs extends Component<Props, State> {
   render() {
     return (
       <>
-        {this.modalWToku()}
         {this.modalNazwa()}
         {this.modalUsun()}
+        {this.modalWToku()}
         {this.modalError()}
       </>
     );
   }
 }
+
+const ModalDialogsGetFake: () => ModalDialogs = () => ({
+  nazwaOn: (label: string, nazwa: string, action: (name: string) => void) => {
+    console.log("ModalDialogsFake nazwaOn error!");
+  },
+  usunOn: (label: string, nazwa: string, action: (name: string) => void) => {
+    console.log("ModalDialogsFake usunOn error!");
+  },
+  errorOn: (label: string, nazwa: string, action: (name: string) => void) => {
+    console.log("ModalDialogsFake errorOn error!");
+  },
+  wTokuOn: () => {
+    console.log("ModalDialogsFake wTokuOn error!");
+  },
+  wTokuOff: () => {
+    console.log("ModalDialogsFake wTokuOff error!");
+  },
+});
+
+export { ModalDialogsGetFake, ModalDialogsComp };

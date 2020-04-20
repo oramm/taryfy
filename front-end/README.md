@@ -1,3 +1,33 @@
+## Instalacja
+
+Zainstaluj Node.js wersja 12.16.2 (z npm 6.14.4): [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
+Sprawdzenie aktualnie zinstalowanej wersji:
+### `node -v`
+
+Pobierz pliki z repozytorum na dysk lokalny.
+
+Przejdz do folderu "./front-end/".
+
+W celu instalacji niezbędnych pakietów uruchom w terminalu komendę:
+
+### `npm i`
+
+
+## Uruchomienie
+
+Będąc w folderze "./front-end/" uruchom komendę:
+
+### `npm start`
+
+
+
+
+
+
+todo: 
+- check `npm run build`
+- check and translate or remove below
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

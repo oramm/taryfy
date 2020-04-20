@@ -10,12 +10,12 @@ import {
   MDBBox,
 } from "mdbreact";
 
-import { post } from "./post";
-import { OnModal } from "./modal_dialogs";
+import { post, cancel } from "./post";
+import { ModalDialogs, ModalDialogsGetFake } from "./modal_dialogs";
 
 type Props = {
   callback: (token: string) => void;
-  on_modal_error: OnModal | undefined;
+  modal_dialogs: ModalDialogs;
 };
 
 type LoginData = {
@@ -26,25 +26,23 @@ type LoginData = {
 type State = {
   data: LoginData;
   callback: (token: string) => void;
-  on_modal_error: OnModal | undefined;
+  modal_dialogs: ModalDialogs;
+  login_error: boolean;
 };
 
 export default class Screen050 extends Component<Props, State> {
   state: State = {
     data: { nazwa: "", haslo: "" },
     callback: (token: string) => {},
-    on_modal_error: (
-      label: string,
-      nazwa: string,
-      action: (nazwa: string) => void
-    ) => {},
+    modal_dialogs: ModalDialogsGetFake(),
+    login_error: false,
   };
 
   constructor(props: Props) {
     super(props);
     console.log("Screen050 constructor: props:", props);
     this.state.callback = props.callback;
-    this.state.on_modal_error = props.on_modal_error;
+    this.state.modal_dialogs = props.modal_dialogs;
   }
 
   UNSAFE_componentWillReceiveProps(props: Props) {}
@@ -52,7 +50,7 @@ export default class Screen050 extends Component<Props, State> {
   onLogin() {
     //todo: validate eg not empty
     console.log("Screen050: onLogin");
-
+    
     post(
       "/uzytkownicy/login",
       this.state.data,
@@ -63,28 +61,31 @@ export default class Screen050 extends Component<Props, State> {
         } else {
           //todo: check when it happend
           console.log("Screen050: onLogin error");
-          this.state.on_modal_error &&
-            this.state.on_modal_error("Nie udało się załogwać", "", () => {});
+          this.setState({login_error: true});
+          // this.state.on_modal_error &&
+          //   this.state.on_modal_error("Nie udało się załogwać", "", () => {});
         }
       },
       (error) => {
-        console.log(
-          "Screen050: onLogin error, on_modal_error:",
-          this.state.on_modal_error
-        );
-        this.state.on_modal_error &&
-          this.state.on_modal_error("Nie udało się załogwać", "", () => {});
+        //todo: check error type and display message
+        console.log("Screen050: onLogin error");
+        this.setState({login_error: true});
+        // this.state.on_modal_error &&
+        //   this.state.on_modal_error("Nie udało się załogwać", "", () => {});
       }
     );
   }
 
   componentDidMount() {
-    console.log("Screen010: componentDidMount");
+    console.log("Screen050: componentDidMount");
   }
 
+  componentWillUnmount() {
+    cancel();
+  }
+  
   render() {
-    console.log("screen010 zalozenia render()");
-    console.log(this.state);
+    console.log("Screen050 zalozenia render(), this.state", this.state);
     return (
       <>
         <MDBNavbar
@@ -101,6 +102,13 @@ export default class Screen050 extends Component<Props, State> {
         <MDBContainer style={{ marginTop: "100px" }} className="w-25">
           <MDBTable>
             <MDBTableBody>
+              {this.state.login_error ? (
+                <tr>
+                  <td colSpan={2}>Błąd logowania, spróbuj ponownie.</td>
+                </tr>
+              ) : (
+                <></>
+              )}
               <tr>
                 <td>Użytkownik:</td>
                 <td>

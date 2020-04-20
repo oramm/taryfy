@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { post } from "./post";
+import { post, cancel } from "./post";
 
 import {
   MDBNavbar,
@@ -15,13 +15,12 @@ import {
 } from "mdbreact";
 
 import Select from "react-select";
-import { OnModal } from "./modal_dialogs";
+import { ModalDialogs, ModalDialogsGetFake } from "./modal_dialogs";
 
 type Props = {
   callback: (name: string, wniosek_id: number) => void;
   logout_callback: () => void;
-  on_modal_usun: OnModal | undefined;
-  on_modal_nazwa: OnModal | undefined;
+  modal_dialogs: ModalDialogs;
 };
 
 type WiosekData = { id: number; nazwa: string };
@@ -30,8 +29,7 @@ type SelectMenuType = { value: string; label: string };
 type State = {
   callback: (name: string, wniosek_id: number) => void;
   logout_callback: () => void;
-  on_modal_nazwa: OnModal | undefined;
-  on_modal_usun: OnModal | undefined;
+  modal_dialogs: ModalDialogs;
   data: WiosekData[];
   wniosek_id: number;
   wnioski_select_menu: SelectMenuType[];
@@ -42,23 +40,22 @@ export default class Menu010 extends Component<Props, State> {
   state: State = {
     callback: (name: string, wniosek_id: number) => {},
     logout_callback: () => {},
-    on_modal_nazwa: (label: string, nazwa: string, action: (nazwa: string) => void) => {},
-    on_modal_usun: (label: string, nazwa: string, action: (nazwa: string) => void) => {},
+    modal_dialogs: ModalDialogsGetFake(),
     data: [],
     wniosek_id: 0,
     wnioski_select_menu: [],
-    wnioski_selected_item: {} as SelectMenuType
+    wnioski_selected_item: {} as SelectMenuType,
   };
 
   constructor(props: Props) {
     super(props);
     this.state.callback = props.callback;
     this.state.logout_callback = props.logout_callback;
-    this.state.on_modal_nazwa = props.on_modal_nazwa;
-    this.state.on_modal_usun = props.on_modal_usun;
+    this.state.modal_dialogs = props.modal_dialogs;
   }
+
   updateWnioski() {
-    post("/wnioski/select", {}, response => {
+    post("/wnioski/select", {}, (response) => {
       let wnioski_select_menu: SelectMenuType[] = [];
       let wnioski_selected: SelectMenuType | undefined = undefined;
       for (let entry of response.data) {
@@ -76,7 +73,7 @@ export default class Menu010 extends Component<Props, State> {
           {
             wnioski_selected_item: wnioski_selected,
             data: response.data,
-            wnioski_select_menu: wnioski_select_menu
+            wnioski_select_menu: wnioski_select_menu,
           },
           () => {
             console.log("Menu010: this.state:");
@@ -91,7 +88,7 @@ export default class Menu010 extends Component<Props, State> {
         this.setState(
           {
             data: response.data,
-            wnioski_select_menu: wnioski_select_menu
+            wnioski_select_menu: wnioski_select_menu,
           },
           () => {
             console.log("Menu010: this.state:");
@@ -107,10 +104,14 @@ export default class Menu010 extends Component<Props, State> {
     this.updateWnioski();
   }
 
+  componentWillUnmount() {
+    cancel();
+  }
+
   dodaj = (nazwa: string) => {
     console.log("Menu010: dodaj");
     console.log(this.state);
-    post("/wnioski/insert", { nazwa: nazwa }, response => {
+    post("/wnioski/insert", { nazwa: nazwa }, (response) => {
       this.setState({ wniosek_id: response.data.insertId });
       this.updateWnioski();
     });
@@ -122,24 +123,24 @@ export default class Menu010 extends Component<Props, State> {
       "/wnioski/update",
       {
         nazwa: nazwa,
-        id: this.state.wnioski_selected_item.value
+        id: this.state.wnioski_selected_item.value,
       },
-      response => {
+      (response) => {
         this.updateWnioski();
       }
     );
   };
 
-  duplikuj = (nazwa: string) => {
+  kopiuj = (nazwa: string) => {
     console.log("Menu010: dupliku");
     console.log(this.state);
     post(
       "/wnioski/clone",
       {
         nazwa: nazwa,
-        id: this.state.wnioski_selected_item.value
+        id: this.state.wnioski_selected_item.value,
       },
-      response => {
+      (response) => {
         console.log(response.data[0]["@last_id"]);
         this.setState({ wniosek_id: response.data[0]["@last_id"] });
         this.updateWnioski();
@@ -153,9 +154,9 @@ export default class Menu010 extends Component<Props, State> {
     post(
       "/wnioski/delete",
       {
-        id: this.state.wnioski_selected_item.value
+        id: this.state.wnioski_selected_item.value,
       },
-      response => {
+      (response) => {
         this.updateWnioski();
       }
     );
@@ -166,7 +167,7 @@ export default class Menu010 extends Component<Props, State> {
     this.setState(
       {
         wnioski_selected_item: e,
-        wniosek_id: e.value
+        wniosek_id: e.value,
       },
       () => {
         console.log("menu010 onChangeWniosek promise this.state:", this.state);
@@ -193,49 +194,46 @@ export default class Menu010 extends Component<Props, State> {
           <MDBNavItem>
             <MDBBtn
               size="sm"
-              onClick={() =>{ this.state.on_modal_nazwa &&
-                this.state.on_modal_nazwa(
+              onClick={() => {
+                this.state.modal_dialogs.nazwaOn(
                   "Dodaj nowy wniosek",
                   this.state.wnioski_selected_item.label,
                   this.dodaj
                 );
-              }
-              }
+              }}
             >
               Dodaj nowy
             </MDBBtn>
             <MDBBtn
               size="sm"
               onClick={() => {
-               console.log("Menu010 edytuj onClick this.state:", this.state);
-                this.state.on_modal_nazwa &&
-                this.state.on_modal_nazwa(
+                console.log("Menu010 edytuj onClick this.state:", this.state);
+                this.state.modal_dialogs.nazwaOn(
                   "Edytuj nazwę wniosku",
                   this.state.wnioski_selected_item.label,
                   this.edytuj
-                )
-              }
-              }
+                );
+              }}
             >
               Edytuj nazwę
             </MDBBtn>
             <MDBBtn
               size="sm"
-              onClick={() => this.state.on_modal_nazwa &&
-                this.state.on_modal_nazwa(
-                  "Dodaj nowy wniosek",
+              onClick={() => {
+                console.log("Menu010 kopiuj onClick this.state:", this.state);
+                this.state.modal_dialogs.nazwaOn(
+                  "Kopiuj wniosek",
                   this.state.wnioski_selected_item.label,
-                  this.duplikuj
-                )
-              }
+                  this.kopiuj
+                );
+              }}
             >
-              Duplikuj
+              Kopiuj
             </MDBBtn>
             <MDBBtn
               size="sm"
               onClick={() =>
-                this.state.on_modal_usun &&
-                this.state.on_modal_usun(
+                this.state.modal_dialogs.usunOn(
                   "Usuń wniosek",
                   this.state.wnioski_selected_item.label,
                   this.usun

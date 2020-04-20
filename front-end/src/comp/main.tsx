@@ -9,8 +9,8 @@ import Screen005 from "./screen005_login";
 import Screen010 from "./screen010_zalozenia";
 import Screen020 from "./screen020_koszty";
 import Screen900 from "./screen900_";
-import { setPostToken } from "./post";
-import ModalDialogs from "./modal_dialogs";
+import { setPostToken, setPostModals } from "./post";
+import {ModalDialogsComp, ModalDialogs, ModalDialogsGetFake} from "./modal_dialogs";
 
 type Props = {};
 
@@ -48,7 +48,7 @@ export default class Main extends Component<Props, State> {
     menu030: 0,
   };
 
-  _modal_dialogs: ModalDialogs | undefined = undefined;
+  _modal_dialogs: ModalDialogs = ModalDialogsGetFake();
 
   componentDidMount() {}
 
@@ -91,9 +91,10 @@ export default class Main extends Component<Props, State> {
   render() {
     return (
       <>
-        <ModalDialogs
-          set_callbacks_callback={(dialogs) => {
+        <ModalDialogsComp
+          set_modal_dialog_callbacks={(dialogs) => {
             this._modal_dialogs = dialogs;
+            setPostModals(dialogs);
             console.log("main ModalDialogs:", this._modal_dialogs);
           }}
         />
@@ -101,7 +102,7 @@ export default class Main extends Component<Props, State> {
           <>
             <Screen005
               callback={this.onLoggedin}
-              on_modal_error={this._modal_dialogs?.modalErrorOn}
+              modal_dialogs={this._modal_dialogs}
             />
           </>
         ) : (
@@ -109,8 +110,7 @@ export default class Main extends Component<Props, State> {
             <Menu010
               callback={this.onChangeMenu010Wnioski}
               logout_callback={this.clearToken}
-              on_modal_nazwa={this._modal_dialogs?.modalNazwaOn}
-              on_modal_usun={this._modal_dialogs?.modalUsunOn}
+              modal_dialogs={this._modal_dialogs}
             />
             <Menu020 callback={this.onChangeMenu020Zakladki} />
             {this.state.menu020 === 1 ? (
@@ -129,8 +129,9 @@ export default class Main extends Component<Props, State> {
             ) : this.state.menu020 === 1 ? (
               <Screen020
                 wniosek_id={this.state.wniosek_id}
+                typ_id={this.state.menu030+1}
                 callback={(value: any) => this.onChangeScreen(value)}
-                on_modal_nazwa={this._modal_dialogs?.modalNazwaOn}
+                modal_dialogs={this._modal_dialogs}
               />
             ) : (
               <Screen900 nazwa={this.state.menu020_name} />

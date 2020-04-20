@@ -3,13 +3,13 @@ const express = require("express");
 const app = express();
 var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
+import { DB } from "./src/db_util";
 const port = 5000;
 
-//import { uzytkownicyRoute } from "./uzytkownicy_route_";
 import { uzytkownicyRouter } from "./src/uzytkownicy";
 import { wnioskiRouter } from "./src/wnioski";
 import { zalozeniaRouter } from "./src/zalozenia";
-import { rodzajeKosztowRouter } from "./src/rodzaje_kosztow";
+import { rodzajeKosztowRouter } from "./src/koszty_rodzaje";
 import { Koszty } from "./src/koszty";
 import { Log } from "./src/log";
 
@@ -21,8 +21,9 @@ app.use(
     extended: true
   })
 );
-
+let counter: number = 0;
 app.use((req, res, next) => {
+  Log(0, "request received counter: ", ++counter);
   Log(0, "request received req.body: ", req.body);
   Log(0, "request received req.originalUrl: ", req.originalUrl);
   Log(0, "request received req.header: ", req.header);
@@ -30,10 +31,30 @@ app.use((req, res, next) => {
   next();
 });
 
+//this is a way to drop and create fresh DB with empty tables
+//instead use:
+//ts-node admin_create_db
+//
+//uncoment it only when you are 100% shure you know what you are doing
+//
+//app.get("/createdb", async (req, res) => {
+//  await DB.crateDB((result: any) => {
+//    var fs = require("fs");
+//    var sql = fs.readFileSync("./src/sql/create_db.sql").toString();
+//    Log(0, "file len: " + fs.readFileSync("./src/sql/create_db.sql").length);
+//    Log(0, "sql: " + sql);
+//    DB.executeSQL(sql, (result) => res.send(result));
+//  });
+//});
+
 app.use("/uzytkownicy", uzytkownicyRouter);
 
 app.use((req, res, next) => {
-  Log(0, "request received req.headers.authorization: ", req.headers.authorization);
+  Log(
+    0,
+    "request received req.headers.authorization: ",
+    req.headers.authorization
+  );
   if (req.headers.authorization) {
     try {
       const decoded = jwt.verify(
@@ -41,13 +62,13 @@ app.use((req, res, next) => {
         //todo: this key is also used in uzytkownicy.ts file, move it to one place
         "g6asdfbw4yhdfvqwe4yfg2365burthff6ui47irtfdgwgh45wv4hsdf0zq1x08lqz34r54brwer4ddwv54t67uhe5rtv"
       );
-      Log(0, "token is correct");
+      Log(0, "token is correct, decoded: ", decoded);
       req.userData = decoded;
       next();
     } catch (error) {
       Log(0, "token verification failed");
       return res.status(401).json({
-        message: "Auth failed"
+        message: "Auth failed",
       });
     }
   } else {
@@ -57,23 +78,14 @@ app.use((req, res, next) => {
 
 app.use("/wnioski", wnioskiRouter);
 app.use("/zalozenia", zalozeniaRouter);
-app.use("/rodzaje_kosztow", rodzajeKosztowRouter);
+app.use("/koszty_rodzaje", rodzajeKosztowRouter);
 
 app.post("/koszty/updatespreadsheet", (req, res) => {
   Log(0, "updatespreadsheet request reacived");
   Koszty.updateSpreadsheet(res, req);
 });
 
-
-//todo: make it available only for tests
-// app.get("/createdb", (req, res) => {
-//   var fs = require("fs");
-
-//   var sql = fs.readFileSync("./db/create_db.sql").toString();
-//   Log(0, "file len: " + fs.readFileSync("./db/create_db.sql").length);
-//   Log(0, "sql: " + sql);
-// });
-
+//todo: return some error?
 app.use((req, res, next) => {
   const error = new Error("Not found");
   //error.status(404);
