@@ -96,7 +96,7 @@ class Uzytkownicy {
             let query = (connection: any) =>
               "INSERT INTO uzytkownicy (klient_id, nazwa, haslo) SELECT  \
               (SELECT id FROM klienci WHERE nazwa LIKE " +
-              connection.escape(req.body.klient_id) +
+              connection.escape(req.body.klient_nazwa) +
               ")," +
               connection.escape(req.body.nazwa) +
               "," +
