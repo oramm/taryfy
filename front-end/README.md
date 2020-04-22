@@ -14,11 +14,13 @@ Zainstaluj zależne pakiedy komendę:
 
 ## Uruchomienie
 
-Będąc w folderze `./front-end` uruchom komendę:
+W folderze `./front-end` uruchom komendę:
 
 `npm start`
 
-## resta tekstu jest do usnięcia
+Otwórz [http://localhost:3000](http://localhost:3000) w przeglądarce.
+
+## Reszta tekstu jest do usnięcia
 
 todo:
 

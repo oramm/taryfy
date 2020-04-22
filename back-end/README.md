@@ -9,7 +9,7 @@ Pobierz pliki z repozytorum na dysk lokalny.
 
 Przejdz do folderu `./back-end`.
 
-Zainstaluj zależne pakiedy komendę:
+Zainstaluj zależne pakiety komendę:
 `npm i`
 
 ## Uruchomienie
@@ -28,8 +28,9 @@ Bazę można utworzyć skryptem ruchamianym komendą:
 ## Dodawanie klientów i użytkowników
 
 Dodawanie użytkowników i/lub klientów wykonywane jest skryptem:
-`add_user.ts`
+`admin_add_user.ts`
+
 Komenda uruchamiająca:
-`ts-node add_user`
+`ts-node admin_add_user`
 
 Dodawanie klientów można wykonać również bezpośrednio na bazie danych, natomiast użtykownicy mogą by dodawani jedynie za pomocą skryptu, ze względu na przechowywanie hasła w formie haszowanej.
