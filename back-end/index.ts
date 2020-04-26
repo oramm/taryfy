@@ -3,7 +3,6 @@ const express = require("express");
 const app = express();
 var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
-import { DB } from "./src/db_util";
 const port = 5000;
 
 import { uzytkownicyRouter } from "./src/uzytkownicy";
@@ -18,7 +17,7 @@ app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(
   bodyParser.urlencoded({
     // to support URL-encoded bodies
-    extended: true
+    extended: true,
   })
 );
 let counter: number = 0;
@@ -43,7 +42,7 @@ app.use((req, res, next) => {
 //    var sql = fs.readFileSync("./src/sql/create_db.sql").toString();
 //    Log(0, "file len: " + fs.readFileSync("./src/sql/create_db.sql").length);
 //    Log(0, "sql: " + sql);
-//    DB.executeSQL(sql, (result) => res.send(result));
+//    DB.execute(sql,res);
 //  });
 //});
 

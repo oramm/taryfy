@@ -1,41 +1,29 @@
 import { uzytkownicyInsert } from "./src/uzytkownicy";
 import { klienciInsert } from "./src/klienci";
 
-let add_user = (data: { nazwa: string; haslo: string; klient_nazwa: string }) => {
-  let req = { body: data };
-  let res = {
-    status: (a: any) => {
-      return { json: (a: any) => {} };
-    },
-    json: (a: any) => {},
-  };
-
-  uzytkownicyInsert(res, req);
+let add_user = async (data: {
+  nazwa: string;
+  haslo: string;
+  klient_nazwa: string;
+}) => {
+  return await uzytkownicyInsert(data);
 };
 
-let add_client = (
+let add_client = async (
   klient: { nazwa: string; opis: string; adres: string; nip: string },
   users?: { nazwa: string; haslo: string }[]
 ) => {
-  let req = { body: klient };
-  let res = {
-    status: (a: any) => {
-      return { json: (a: any) => {} };
-    },
-    json: (a: any) => {},
-    send: (send_res: any) => {
-      console.log("add_client res:", send_res);
-      users && users.map((item) => {
-        add_user({
-          klient_nazwa: klient.nazwa,
-          nazwa: item.nazwa,
-          haslo: item.haslo,
-        });
+  let ret = await klienciInsert(klient);
+  if (users) {
+    for (let i = 0; i < users.length; i++) {
+      ret = await add_user({
+        klient_nazwa: klient.nazwa,
+        nazwa: users[i].nazwa,
+        haslo: users[i].haslo,
       });
-    },
-  };
-
-  klienciInsert(res, req);
+    }
+  }
+  return ret;
 };
 
-export {add_user, add_client};
+export { add_user, add_client };

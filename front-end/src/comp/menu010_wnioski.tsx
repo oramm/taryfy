@@ -58,7 +58,7 @@ export default class Menu010 extends Component<Props, State> {
     post("/wnioski/select", {}, (response) => {
       let wnioski_select_menu: SelectMenuType[] = [];
       let wnioski_selected: SelectMenuType | undefined = undefined;
-      for (let entry of response.data) {
+      for (let entry of response.data[1]) {
         wnioski_select_menu.push({ value: entry.id, label: entry.nazwa });
         if (this.state.wniosek_id === Number(entry.id)) {
           wnioski_selected = { value: entry.id, label: entry.nazwa };
@@ -72,7 +72,7 @@ export default class Menu010 extends Component<Props, State> {
         this.setState(
           {
             wnioski_selected_item: wnioski_selected,
-            data: response.data,
+            data: response.data[1],
             wnioski_select_menu: wnioski_select_menu,
           },
           () => {
@@ -87,7 +87,7 @@ export default class Menu010 extends Component<Props, State> {
       } else {
         this.setState(
           {
-            data: response.data,
+            data: response.data[1],
             wnioski_select_menu: wnioski_select_menu,
           },
           () => {

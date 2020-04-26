@@ -1,4 +1,4 @@
-var mysql = require("mysql");
+const mysql = require("mysql");
 import { Log } from "./log";
 
 //todo: consider moving it to seperate file
@@ -11,21 +11,28 @@ let db_setup = {
   multipleStatements: true,
 };
 
-//todo: refactor this class, too much code duplication
-
-class AccessDB {
-  private static _instance: AccessDB;
-  private static _counter: number = 0;
-  public static get(): AccessDB {
-    if (!AccessDB._instance) {
-      AccessDB._instance = new AccessDB();
+class DB {
+  private static _instance: DB;
+  public static get(): DB {
+    if (!DB._instance) {
+      DB._instance = new DB();
     }
 
-    return AccessDB._instance;
+    return DB._instance;
   }
 
-  async crateDB(callback?: (results: any) => void) {
-    Log(0, "crateDB _counter:", ++AccessDB._counter);
+  private _counter: number;
+  constructor() {
+    Log(0, "DB.constructor ");
+    this._counter = 0;
+  }
+
+  public escape = (text: string): string => {
+    return mysql.escape(text);
+  };
+
+  async crateDB(callback?: (error: any, results: any) => void) {
+    Log(0, "crateDB");
     let setup = {
       host: db_setup.host,
       user: db_setup.user,
@@ -33,115 +40,82 @@ class AccessDB {
       port: db_setup.port,
       multipleStatements: db_setup.multipleStatements,
     };
-    var connection = mysql.createConnection(setup);
-
-    connection.connect((err) => {
-      if (err) {
-        Log(0, "db connection error: " + err.stack);
-        return;
-      }
-      Log(0, "connected as id " + connection.threadId);
+    let query =
+      "DROP DATABASE IF EXISTS " +
+      db_setup.database +
+      ";\
+    CREATE DATABASE " +
+      db_setup.database +
+      ";";
+    return await this.execute(query, null, (error, results) => {
+      callback && callback(error, results);
     });
-    let query = "DROP DATABASE IF EXISTS " + db_setup.database + ";\
-    CREATE DATABASE " + db_setup.database + ";"
-    Log(0, "executing query: " + query);
-    await connection.query(query, (error, results, fields) => {
-      if (error) {
-        Log(0, "query error", error, results);
-        return;
-      }
-      Log(0, "query results: ", results);
-      callback && callback(results);
-    });
-
-    await connection.end();    
   }
 
-  async executeLocalSQL(query: string, callback?: (results: any) => void) {
-    Log(0, "executeLocalSQL _counter:", ++AccessDB._counter);
-    var connection = mysql.createConnection(db_setup);
-
-    connection.connect(function (err) {
-      if (err) {
-        Log(0, "db connection error: " + err.stack);
-        return;
-      }
-      Log(0, "connected as id " + connection.threadId);
-    });
-
-    Log(0, "executing query: " + query);
-
-    await connection.query(query, function (error, results, fields) {
-      if (error) {
-        Log(0, "query error", error, results);
-        return;
-      }
-      Log(0, "query results: ", results);
-      callback && callback(results);
-    });
-
-    await connection.end();
-  }
-
-  executeSQL(query: string, callback?: (results: any) => void) {
-    Log(0, "ececuteSQL _counter:", ++AccessDB._counter);
-    var connection = mysql.createConnection(db_setup);
-
-    connection.connect(function (err) {
-      if (err) {
-        Log(0, "db connection error: " + err.stack);
-        return;
-      }
-      Log(0, "connected as id " + connection.threadId);
-    });
-
-    Log(0, "executing query: " + query);
-
-    connection.query(query, function (error, results, fields) {
-      if (error) {
-        Log(0, "query error", error, results);
-        return;
-      }
-      Log(0, "query results: ", results);
-      callback && callback(results);
-    });
-
-    connection.end();
-  }
-
-  //todo: add error return and use in in code
-  executeSQLSanitize(
-    query: (connection: any) => string,
-    res: any,
-    callback: (results: any) => void
+  public async execute(
+    query: string,
+    res?: any,
+    callback?: (error, result) => any
   ) {
-    Log(0, "ececuteSQLSanitize _counter:", ++AccessDB._counter);
-    var connection = mysql.createConnection(db_setup);
-    connection.connect(function (err) {
-      if (err) {
-        Log(0, "databasa connection error: " + err.stack);
-        return res.status(500).json({
-          message: "Databasa connection error.",
-        });
-      }
-      Log(0, "connected as id " + connection.threadId);
-      Log(0, "executing query: " + query(connection));
-      connection.query(query(connection), function (error, results, fields) {
-        if (error) {
-          Log(0, "query error: ", error);
-          return res.status(400).json({
-            message: "Invalid query.",
+    return this.executeAsync(query, res, callback);
+  }
+
+  public async executeAsync(
+    query: string,
+    res?: any,
+    callback?: (error, result) => any
+  ) {
+    let counter = ++this._counter;
+    Log(0, "DB.executeAsync " + counter + " query: " + query);
+    let promise = new Promise((resolutionFunc, rejectionFunc) => {
+      let connection = mysql.createConnection(db_setup);
+      connection.connect((connection_error) => {
+        if (connection_error) {
+          Log(
+            0,
+            "DB.executeAsync " + counter + " connection_error: ",
+            connection_error
+          );
+          rejectionFunc(connection_error);
+        } else {
+          connection.query(query, (error, result) => {
+            //connection.query("START TRANSACTION;" + query + "; COMMIT;", (error, result) => {
+            Log(0, "DB.executeAsync " + counter + " error: ", error);
+            Log(0, "DB.executeAsync " + counter + " results: ", result);
+            connection.end();
+            //Log(0, "DB.execute fields: ", fields);
+            if (error) {
+              rejectionFunc(error);
+            } else {
+              resolutionFunc(result);
+            }
           });
         }
-        Log(0, "query results: ", results);
-        Log(0, "results.insertId: ", results.insertId);
-        callback(results);
       });
-      connection.end();
-    });
+    })
+      .then((result) => {
+        Log(0, "DB.executeAsync " + counter + " promise then");
+        res && res.send(result);
+        if (callback) return callback(null, result);
+        Log(0, "DB.executeAsync " + counter + " promise then after callback");
+      })
+      .catch((error) => {
+        Log(0, "DB.executeAsync " + counter + " promise catch");
+        res &&
+          res.status(500).json({
+            message: "Databasa error: " + error,
+          });
+        if (callback) return callback(error, null);
+      })
+      .finally(() => {
+        Log(0, "DB.executeAsync " + counter + " promise finally");
+      });
+
+    Log(0, "DB.executeAsync " + counter + " before await promise: ", promise);
+    await promise;
+    Log(0, "DB.executeAsync " + counter + " after  await promise: ", promise);
+    return promise;
   }
 }
-
-let DB: AccessDB = AccessDB.get();
-
-export { DB };
+let _DB: DB = DB.get();
+export { _DB as DB };

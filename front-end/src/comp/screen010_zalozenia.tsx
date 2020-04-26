@@ -63,11 +63,13 @@ export default class Screen010 extends Component<Props, ComponentState> {
           wniosek_id: this.state.wniosek_id,
         },
         (response) => {
-          console.log("Axios.post zalozenia/get response");
+          console.log("Axios.post zalozenia/select response");
           console.log(response);
-          if (response.data.length > 0) {
-            this.setState({ data: response.data[0] });
+          if (response.data.length > 1) {
+            this.setState({ data: response.data[1][0] });
             console.log(this.state);
+          } else {
+            //todo: some error?
           }
         }
       );
@@ -75,28 +77,15 @@ export default class Screen010 extends Component<Props, ComponentState> {
   }
 
   UNSAFE_componentWillReceiveProps(props: Props) {
-    if (this.state.wniosek_id !== props.wniosek_id) {
-      this.setState({ wniosek_id: props.wniosek_id }, this.loadData);
-    }
+    this.setState({ wniosek_id: props.wniosek_id }, this.loadData);
   }
 
   onZapiszZmiany() {
-    if (this.state.wniosek_id! > 0) {
+    if (this.state.wniosek_id > 0) {
       console.log("Screen010: onZapiszZmiany");
       post("/zalozenia/update", this.state.data, (response) => {
         console.log("Axios.post zalozenia/update response");
-        post(
-          "/zalozenia/select",
-          {
-            wniosek_id: this.state.wniosek_id,
-          },
-          (response) => {
-            console.log("Axios.post zalozenia/get response");
-            console.log(response);
-            this.setState({ data: response.data[0] });
-            console.log(this.state);
-          }
-        );
+        this.loadData();
       });
     }
   }

@@ -2,7 +2,7 @@ const express = require("express");
 
 var router = express.Router();
 
-import {Log} from "./Log"
+import { Log } from "./Log";
 import { DB } from "./db_util";
 
 router.post("/select", (req, res) => {
@@ -16,7 +16,7 @@ router.post("/update", (req, res) => {
 class Zalozenia {
   //metoda dodaje nowy wpis, jezeli nie bylo zadnego
   static SelectAfterInsertWhenEmpty(res, req) {
-    Log(0,'Zalozenia Select received req.body=', req.body);
+    Log(0, "Zalozenia Select received req.body=", req.body);
     let query =
       " \
       INSERT INTO zalozenia (wniosek_id,inflacja_1,wskaznik_cen_1,marza_zysku_1,inflacja_2,wskaznik_cen_2,marza_zysku_2,inflacja_3,wskaznik_cen_3,marza_zysku_3) \
@@ -27,18 +27,14 @@ class Zalozenia {
       "); \
       SELECT * FROM zalozenia WHERE wniosek_id=" +
       req.body.wniosek_id;
-    DB.executeSQL(query, result => {
-      res.send(result[1]);
-    });
+    DB.execute(query, res);
   }
-  
+
   static Select(res, req) {
-    Log(0,'Zalozenia Select received req.body=', req.body);
+    Log(0, "Zalozenia Select received req.body=", req.body);
     let query =
       "SELECT * from zalozenia where wniosek_id=" + req.body.wniosek_id;
-    DB.executeSQL(query, result => {
-      res.send(result);
-    });
+    DB.execute(query, res);
   }
 
   static Update(res, req) {
@@ -63,10 +59,8 @@ class Zalozenia {
       req.body.marza_zysku_3 +
       " WHERE `id`=" +
       req.body.id;
-    DB.executeSQL(query, result => {
-      res.send(result);
-    });
+    DB.execute(query, res);
   }
 }
 
-export {router as zalozeniaRouter};
+export { router as zalozeniaRouter };

@@ -4,42 +4,55 @@ var router = express.Router();
 import { Log } from "./log";
 import { DB } from "./db_util";
 
-router.post("/insert", (req, res) => {
-  Klienci.insert(res, req);
-});
+// this functionality is only available via script admin_add_user
+// router.post("/insert", (req, res) => {
+//   Klienci.insert(res, req);
+// });
 
 class Klienci {
-  static insert(res, req) {
-    Log(0, "Klienci insert received req.body=", req.body);
-    let query = (connection: any) =>
-      "SELECT * from klienci where nazwa =" + connection.escape(req.body.nazwa);
+  static async insert(klient: {
+    nazwa: string;
+    opis: string;
+    adres: string;
+    nip: string;
+  }) {
+    Log(0, "Klienci.insert received klient: ", klient);
+    let query = "SELECT * from klienci where nazwa =" + DB.escape(klient.nazwa);
 
-    DB.executeSQLSanitize(query, res, (result) => {
+    return await DB.executeAsync(query, null, async (error, result) => {
+      Log(0, "Klienci.insert query SELECT finished");
       let size: string = result.length;
+      if (error) {
+        Log(0, "Nie udało się dodać klienta: ", klient.nazwa);
+      }
       if (Number(size) > 0) {
-        //error, user already exists
-        res.json({
-          message: "Klient already exists",
-        });
+        Log(
+          0,
+          "Nie udało się dodać klienta, klient już istnieje: ",
+          klient.nazwa
+        );
       } else {
-        let query = (connection: any) =>
+        let query =
           "INSERT INTO klienci (nazwa, opis, adres, nip) SELECT " +
-          connection.escape(req.body.nazwa) +
+          DB.escape(klient.nazwa) +
           "," +
-          connection.escape(req.body.opis) +
+          DB.escape(klient.opis) +
           "," +
-          connection.escape(req.body.adres) +
+          DB.escape(klient.adres) +
           "," +
-          connection.escape(req.body.nip) +
+          DB.escape(klient.nip) +
           " WHERE NOT EXISTS (SELECT * FROM klienci WHERE nazwa=" +
-          connection.escape(req.body.nazwa) +
+          DB.escape(klient.nazwa) +
           ");";
-        DB.executeSQLSanitize(query, res, result => {
-          Log(0, result);
-          res.send(result);
+        return await DB.executeAsync(query, null, (error, result) => {
+          if (error)
+            Log(0, "Nie udało się dodać klienta o nazwie: ", klient.nazwa);
+          else if (result) Log(0, "Klient dodany: ", klient.nazwa);
         });
+        //Log(0, "Klienci.insert query INSERT finised");
       }
     });
+    Log(0, "Klienci.insert fineshed: ", klient);
   }
 }
 

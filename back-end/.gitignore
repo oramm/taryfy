@@ -12,3 +12,4 @@
 /build
 
 /src/creds-from-google.json
+/test.ts

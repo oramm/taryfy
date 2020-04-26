@@ -20,11 +20,7 @@ export type ModalDialogs = {
     nazwa: string,
     action: (name: string) => void
   ) => void;
-  errorOn: (
-    label: string,
-    nazwa: string,
-    action: (name: string) => void
-  ) => void;
+  errorOn: (label: string) => void;
   wTokuOn: () => void;
   wTokuOff: () => void;
 };
@@ -138,7 +134,7 @@ class ModalDialogsComp extends Component<Props, State> {
     );
     //todo: is it thread safe?
     this.state.modal_w_toku_count > 0 &&
-      await this.setState(
+      (await this.setState(
         {
           modal_w_toku_count: this.state.modal_w_toku_count - 1,
         },
@@ -148,14 +144,10 @@ class ModalDialogsComp extends Component<Props, State> {
               modal_w_toku_on: false,
             });
         }
-      );
+      ));
   };
 
-  public errorOn = (
-    label: string,
-    nazwa: string,
-    action: (name: string) => void
-  ) => {
+  public errorOn = (label: string) => {
     console.log("modalErrorOn label: ", label);
     this.setState({
       modal_label: label,
@@ -289,7 +281,7 @@ const ModalDialogsGetFake: () => ModalDialogs = () => ({
   usunOn: (label: string, nazwa: string, action: (name: string) => void) => {
     console.log("ModalDialogsFake usunOn error!");
   },
-  errorOn: (label: string, nazwa: string, action: (name: string) => void) => {
+  errorOn: (label: string) => {
     console.log("ModalDialogsFake errorOn error!");
   },
   wTokuOn: () => {

@@ -13,9 +13,8 @@ class AxiosPost {
   }
   public static cancel() {
     let cancel = AxiosPost._cancel.shift();
-    while (cancel)
-    {
-      console.log("cancel:",cancel);
+    while (cancel) {
+      console.log("cancel:", cancel);
       cancel.cancel();
       cancel = AxiosPost._cancel.shift();
     }
@@ -49,7 +48,11 @@ class AxiosPost {
         AxiosPost._modal_dialogs.wTokuOff();
         if (axios.isCancel(error)) {
           console.log("request canceled error:", error);
+          AxiosPost._modal_dialogs.errorOn("Operacja została anulowana.");
         } else {
+          AxiosPost._modal_dialogs.errorOn(
+            "Nieudane połączenie z serwerem: " + error
+          );
           console.log("post error:", error);
         }
         AxiosPost._cancel.splice(AxiosPost._cancel.indexOf(cancel), 1);
