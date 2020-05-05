@@ -1,16 +1,22 @@
 import { Component } from "react";
 import * as React from "react";
-import { MDBBox } from "mdbreact";
+import { MDBBox, MDBContainer } from "mdbreact";
 
 import Menu010 from "./menu010_wnioski";
 import Menu020 from "./menu020_zakladki";
 import Menu030 from "./menu030_podmenu";
-import Screen005 from "./screen005_login";
-import Screen010 from "./screen010_zalozenia";
-import Screen020 from "./screen020_koszty";
+import { Screen005_login } from "./screen005_login";
+import { Screen010_zalozenia } from "./screen010_zalozenia";
+import { Screen020_koszty } from "./screen020_koszty";
+import { Screen040_popyt } from "./screen040_popyt";
+import { Screen050_grupy_odbiorcow } from "./screen050_grupy_odbiorcow";
 import Screen900 from "./screen900_";
 import { setPostToken, setPostModals } from "./post";
-import {ModalDialogsComp, ModalDialogs, ModalDialogsGetFake} from "./modal_dialogs";
+import {
+  ModalDialogsComp,
+  ModalDialogs,
+  ModalDialogsGetFake,
+} from "./modal_dialogs";
 
 type Props = {};
 
@@ -26,7 +32,7 @@ type State = {
 };
 
 let Menu030Items: string[][] = [
-  ["1-12", "13-24", "25-36"],
+  [],
   [
     "Koszty - Woda",
     "Koszty - Ścieki",
@@ -34,6 +40,9 @@ let Menu030Items: string[][] = [
     "Koszty ogólne",
     "Koszty inne",
   ],
+  [],
+  ["Popyt - Woda", "Popyt - Ścieki"],
+  ["Grupy Odbiorców - Woda", "Grupy Odbiorców - Ścieki"],
 ];
 
 export default class Main extends Component<Props, State> {
@@ -100,7 +109,7 @@ export default class Main extends Component<Props, State> {
         />
         {this.state.token === "" ? (
           <>
-            <Screen005
+            <Screen005_login
               callback={this.onLoggedin}
               modal_dialogs={this._modal_dialogs}
             />
@@ -113,7 +122,8 @@ export default class Main extends Component<Props, State> {
               modal_dialogs={this._modal_dialogs}
             />
             <Menu020 callback={this.onChangeMenu020Zakladki} />
-            {this.state.menu020 === 1 ? (
+            {Menu030Items[this.state.menu020] &&
+            Menu030Items[this.state.menu020].length > 0 ? (
               <Menu030
                 callback={(value: any) => this.onChangeMenu030Podmenu(value)}
                 menu_items={Menu030Items[this.state.menu020]}
@@ -124,18 +134,34 @@ export default class Main extends Component<Props, State> {
             <MDBBox tag="h3" display="flex" m="3" className="left">
               {this.state.menu020_name}
             </MDBBox>
-            {this.state.menu020 === 0 ? (
-              <Screen010 wniosek_id={this.state.wniosek_id} />
-            ) : this.state.menu020 === 1 ? (
-              <Screen020
-                wniosek_id={this.state.wniosek_id}
-                typ_id={this.state.menu030+1}
-                callback={(value: any) => this.onChangeScreen(value)}
-                modal_dialogs={this._modal_dialogs}
-              />
-            ) : (
-              <Screen900 nazwa={this.state.menu020_name} />
-            )}
+            <MDBContainer>
+              {this.state.menu020 === 0 ? (
+                <Screen010_zalozenia wniosek_id={this.state.wniosek_id} />
+              ) : this.state.menu020 === 1 ? (
+                <Screen020_koszty
+                  wniosek_id={this.state.wniosek_id}
+                  typ_id={this.state.menu030 + 1}
+                  callback={(value: any) => this.onChangeScreen(value)}
+                  modal_dialogs={this._modal_dialogs}
+                />
+              ) : this.state.menu020 === 3 ? (
+                <Screen040_popyt
+                  wniosek_id={this.state.wniosek_id}
+                  typ_id={this.state.menu030 + 1}
+                  callback={(value: any) => this.onChangeScreen(value)}
+                  modal_dialogs={this._modal_dialogs}
+                />
+              ) : this.state.menu020 === 4 ? (
+                <Screen050_grupy_odbiorcow
+                  wniosek_id={this.state.wniosek_id}
+                  typ_id={this.state.menu030 + 1}
+                  callback={(value: any) => this.onChangeScreen(value)}
+                  modal_dialogs={this._modal_dialogs}
+                />
+              ) : (
+                <Screen900 nazwa={this.state.menu020_name} />
+              )}
+            </MDBContainer>
           </>
         )}
       </>

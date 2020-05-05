@@ -8,9 +8,15 @@ const port = 5000;
 import { uzytkownicyRouter } from "./src/uzytkownicy";
 import { wnioskiRouter } from "./src/wnioski";
 import { zalozeniaRouter } from "./src/zalozenia";
-import { rodzajeKosztowRouter } from "./src/koszty_rodzaje";
-import { Koszty } from "./src/koszty";
+import { KosztyRodzajeRouter } from "./src/koszty_rodzaje";
+import { KosztyWskaznikiRouter } from "./src/koszty_wskazniki";
+import { KosztySpreadsheetRouter } from "./src/koszty_spreadsheet";
+import { KosztyRouter } from "./src/koszty";
+import { PopytElementSprzedazyRouter } from "./src/popyt_element_sprzedazy";
+import { PopytWariantySymulacjiRouter } from "./src/popyt_warianty_symulacji";
+import { GrupyOdbiorcowRouter } from "./src/grupy_odbiorcow";
 import { Log } from "./src/log";
+import { KosztySpreadsheet } from "./src/koszty_spreadsheet";
 
 app.use(express.static("public"));
 app.use(bodyParser.json()); // to support JSON-encoded bodies
@@ -77,16 +83,18 @@ app.use((req, res, next) => {
 
 app.use("/wnioski", wnioskiRouter);
 app.use("/zalozenia", zalozeniaRouter);
-app.use("/koszty_rodzaje", rodzajeKosztowRouter);
+app.use("/koszty_rodzaje", KosztyRodzajeRouter);
+app.use("/koszty_wskazniki", KosztyWskaznikiRouter);
+app.use("/koszty_spreadsheet", KosztySpreadsheetRouter);
+app.use("/koszty", KosztyRouter);
+app.use("/popyt_element_sprzedazy",  PopytElementSprzedazyRouter);
+app.use("/popyt_warianty_symulacji",  PopytWariantySymulacjiRouter);
+app.use("/grupy_odbiorcow",  GrupyOdbiorcowRouter);
 
-app.post("/koszty/updatespreadsheet", (req, res) => {
-  Log(0, "updatespreadsheet request reacived");
-  Koszty.updateSpreadsheet(res, req);
-});
 
 //todo: return some error?
 app.use((req, res, next) => {
-  const error = new Error("Not found");
+  const error = new Error("Taryfy back-end error - adress not found");
   //error.status(404);
   next(error);
 });

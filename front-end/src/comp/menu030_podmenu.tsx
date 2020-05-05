@@ -1,28 +1,31 @@
 import React, { Component } from "react";
 import { MDBBtn, MDBBtnGroup, MDBBox } from "mdbreact";
 
-type Menu030Props = {
+type Props = {
   callback: (index: number) => void;
   menu_items: string[];
 };
 
-type Menu030State = {
+type State = {
   callback: (index: number) => void;
   menu_items: string[];
   selected_item: number;
 };
 
-export default class Menu030 extends Component<Menu030Props, Menu030State> {
-  state: Menu030State = {
+export default class Menu030 extends Component<Props, State> {
+  state: State = {
     callback: (index: number) => {},
     menu_items: [],
     selected_item: 0
   };
 
-  constructor(props: Menu030Props) {
+  constructor(props: Props) {
     super(props);
     this.state.callback = props.callback;
     this.state.menu_items = props.menu_items;
+  }
+  UNSAFE_componentWillReceiveProps(props: Props) {
+    this.setState({menu_items: props.menu_items});
   }
 
   onMenuItemClick(index: number) {

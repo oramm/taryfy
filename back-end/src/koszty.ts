@@ -1,49 +1,71 @@
-import { RodzajeKosztow } from "./koszty_rodzaje";
+const express = require("express");
 import { Log } from "./log";
 
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+import { DB } from "./db_util";
 
-export class Koszty {
-  static async updateSpreadsheet(
-    // res: { send: (arg0: any) => void },
-    res: any,
-    req: { body: { nazwa: any; id: string } }
-  ) {
-    const doc = new GoogleSpreadsheet(
-      "1Whi0wLCOyF1NSjc04vMDNXs3xcOvJL5Qd1FZV_gwnAk"
-    );
-    await doc.useServiceAccountAuth(require("./creds-from-google.json"));
+var router = express.Router();
+// router.post("/select", (req, res) => {
+//   Koszty.Select(res, req);
+// });
+// router.post("/deleteinsert", (req, res) => {
+//   Koszty.Insert(res, req, true);
+// });
 
-    await doc.loadInfo(); // loads document properties and worksheets
-    Log(0, doc.title);
+class Koszty {
+  static async Select(req, callback) {
+    Log(0, "Koszty.Select req.body:", req.body);
+    let query =
+      "SELECT * from koszty WHERE wniosek_id=" +
+      req.body.wniosek_id +
+      " AND typ_id=" +
+      req.body.typ_id;
+    return DB.execute(query, null, callback);
+  }
 
-    const sheet = doc.sheetsByIndex[0]; // or use doc.sheetsById[id]
-    Log(0, "updateSpreadsheet title:", sheet.title);
-    Log(0, "updateSpreadsheet sheet:", sheet);
+  static Insert(res, req, delete_first: boolean) {
+    Log(0, "Koszty.Insert req.body:", req.body);
 
-    const rows = await sheet.getRows();
-    Log(0, "updateSpreadsheet rows.length:", rows.length);
-
-    for (let i: number = rows.length - 1; i >= 0; i--) {
-      Log(0, "updateSpreadsheet rows[i]:", i);
-      await rows[i].del();
+    let query = delete_first
+      ? "DELETE FROM koszty WHERE wniosek_id = " +
+        req.body.wniosek_id +
+        " AND typ_id = " +
+        req.body.typ_id +
+        "; "
+      : "";
+    for (let i = 0; i < req.body.data.length; i++) {
+      query +=
+        "INSERT INTO koszty (wniosek_id, typ_id, rodzaj_nazwa, rok_obrachunkowy_1, rok_obrachunkowy_2,rok_obrachunkowy_3, rok_nowych_taryf_1, rok_nowych_taryf_2, rok_nowych_taryf_3) VALUES (" +
+        req.body.wniosek_id +
+        "," +
+        req.body.typ_id +
+        "," +
+        DB.escape(req.body.data[i].rodzaj_nazwa) +
+        "," +
+        DB.escape(req.body.data[i].rok_obrachunkowy_1) +
+        "," +
+        DB.escape(req.body.data[i].rok_obrachunkowy_2) +
+        "," +
+        DB.escape(req.body.data[i].rok_obrachunkowy_3) +
+        "," +
+        DB.escape(req.body.data[i].rok_nowych_taryf_1) +
+        "," +
+        DB.escape(req.body.data[i].rok_nowych_taryf_2) +
+        "," +
+        DB.escape(req.body.data[i].rok_nowych_taryf_3) +
+        "); ";
     }
+    DB.execute(query, res);
+  }
 
-    RodzajeKosztow.Select(
-      {
-        send: async (select_res: any) => {
-          let koszty_rodzaje: string[][] = [];
-          await select_res.map(async (item) => {
-            let row: string[] = [item.nazwa];
-            koszty_rodzaje.push(row);
-          });
-          Log(0, "updateSpreadsheet koszty_rodzaje:", koszty_rodzaje);
-          let ret = await sheet.addRows(koszty_rodzaje);
-          Log(0, "updateSpreadsheet ret:", ret);
-          res.status(200).send("Spreadsheet updated");
-        }
-      },
-      req
-    );
+  static Delete(res, req) {
+    // let query = "DELETE FROM koszty WHERE id = " + req.body.id;
+    let query =
+      "DELETE FROM koszty WHERE wniosek_id = " +
+      req.body.wniosek_id +
+      " AND typ_id = " +
+      req.body.typ_id;
+    DB.execute(query, res);
   }
 }
+
+export { router as KosztyRouter, Koszty };

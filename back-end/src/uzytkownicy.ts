@@ -105,7 +105,7 @@ class Uzytkownicy {
             if (Number(size) > 0) {
               Log(
                 0,
-                "Błąd - urzytkownik o podanej nazwie już istnieje: ",
+                "Błąd - uzytkownik o podanej nazwie już istnieje: ",
                 user.nazwa
               );
             } else {

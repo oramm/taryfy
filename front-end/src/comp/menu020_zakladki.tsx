@@ -19,7 +19,7 @@ export default class Menu020 extends Component<Menu020Props, Menu020State> {
       "Koszty",
       "Kredyty i pożyczki",
       "Popyt",
-      "Grupy taryfowe",
+      "Grupy odbiorców",
       "Abonamenty",
       "Alokacja kosztów do elementów przychodów",
       "Alokacja kosztów do grup taryfowych",

@@ -202,7 +202,7 @@ export default class Menu010 extends Component<Props, State> {
                 );
               }}
             >
-              Dodaj nowy
+              Dodaj
             </MDBBtn>
             <MDBBtn
               size="sm"
@@ -215,7 +215,7 @@ export default class Menu010 extends Component<Props, State> {
                 );
               }}
             >
-              Edytuj nazwę
+              Edytuj
             </MDBBtn>
             <MDBBtn
               size="sm"

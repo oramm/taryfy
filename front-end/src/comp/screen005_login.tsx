@@ -30,7 +30,7 @@ type State = {
   login_error: boolean;
 };
 
-export default class Screen050 extends Component<Props, State> {
+class Screen005 extends Component<Props, State> {
   state: State = {
     data: { nazwa: "", haslo: "" },
     callback: (token: string) => {},
@@ -154,3 +154,5 @@ export default class Screen050 extends Component<Props, State> {
     );
   }
 }
+
+export {Screen005 as Screen005_login};

@@ -2,7 +2,7 @@
 
 Zainstaluj [Node.js](https://nodejs.org/en/download) wersja 12.16.2 (z npm 6.14.4).
 
-Sprawdzenie aktualnie zinstalowanej wersji:
+Sprawdzenie aktualnie zainstalowanej wersji:
 
     node -v
 

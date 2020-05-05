@@ -52,6 +52,48 @@ class DB {
     });
   }
 
+  public async executeSync(
+    query: string,
+    res?: any,
+    callback?: (error, result) => any
+  ) {
+    let counter = ++this._counter;
+    Log(0, "DB.executeAsync " + counter + " query: " + query);
+    let connection = mysql.createConnection(db_setup);
+    connection.connect((connection_error) => {
+      if (connection_error) {
+        Log(
+          0,
+          "DB.executeAsync " + counter + " connection_error: ",
+          connection_error
+        );
+        res &&
+          res.status(500).json({
+            message: "Databasa error: " + connection_error,
+          });
+        if (callback) return callback(connection_error, null);
+      } else {
+        connection.query(query, (error, result) => {
+          //connection.query("START TRANSACTION;" + query + "; COMMIT;", (error, result) => {
+          Log(0, "DB.executeAsync " + counter + " error: ", error);
+          Log(0, "DB.executeAsync " + counter + " results: ", result);
+          connection.end();
+          //Log(0, "DB.execute fields: ", fields);
+          if (error) {
+            res &&
+              res.status(500).json({
+                message: "Databasa error: " + error,
+              });
+            if (callback) return callback(error, null);
+          } else {
+            res && res.send(result);
+            if (callback) return callback(null, result);
+          }
+        });
+      }
+    });
+  }
+
   public async execute(
     query: string,
     res?: any,

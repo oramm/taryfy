@@ -18,8 +18,7 @@ class Zalozenia {
   static SelectAfterInsertWhenEmpty(res, req) {
     Log(0, "Zalozenia Select received req.body=", req.body);
     let query =
-      " \
-      INSERT INTO zalozenia (wniosek_id,inflacja_1,wskaznik_cen_1,marza_zysku_1,inflacja_2,wskaznik_cen_2,marza_zysku_2,inflacja_3,wskaznik_cen_3,marza_zysku_3) \
+      "INSERT INTO zalozenia (wniosek_id,inflacja_1,wskaznik_cen_1,marza_zysku_1,inflacja_2,wskaznik_cen_2,marza_zysku_2,inflacja_3,wskaznik_cen_3,marza_zysku_3) \
       SELECT " +
       req.body.wniosek_id +
       ",10,11,12,21,22,23,31,32,33 WHERE NOT EXISTS (SELECT * FROM zalozenia WHERE wniosek_id=" +

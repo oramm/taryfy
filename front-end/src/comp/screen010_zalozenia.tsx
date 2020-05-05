@@ -32,7 +32,7 @@ type ComponentState = {
   data: ZalozeniaData;
 };
 
-export default class Screen010 extends Component<Props, ComponentState> {
+class Screen010 extends Component<Props, ComponentState> {
   state: ComponentState = {
     wniosek_id: 0,
     data: {
@@ -262,3 +262,5 @@ export default class Screen010 extends Component<Props, ComponentState> {
     );
   }
 }
+
+export{Screen010 as Screen010_zalozenia}
