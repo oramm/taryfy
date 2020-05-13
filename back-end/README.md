@@ -35,4 +35,4 @@ Dodawanie użytkowników i/lub klientów wykonywane jest skryptem `admin_add_use
 
     ts-node admin_add_user
 
-Dodawanie klientów można wykonać również bezpośrednio na bazie danych, natomiast użtykownicy mogą by dodawani jedynie za pomocą skryptu, ze względu na przechowywanie hasła w formie haszowanej.
+Dodawanie klientów można wykonać również bezpośrednio na bazie danych, natomiast użtykownicy mogą być dodawani jedynie za pomocą skryptu, ze względu na przechowywanie hasła w formie haszowanej.

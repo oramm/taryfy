@@ -96,8 +96,7 @@ export default class Screen extends Component<Props, State> {
     post(
       "/grupy_odbiorcow/update",
       {
-        id: id,
-        data: { nazwa: nazwa, opis: opis },
+        data: { id: id, nazwa: nazwa, opis: opis },
       },
       (response) => {
         console.log("Screen050: onGrupyOdbiorcowEdytuj response:", response);

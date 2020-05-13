@@ -67,6 +67,8 @@ class PopytElementSprzedazy {
       DB.escape(req.body.sprzedaz.abonament_nazwa) +
       ", abonament_wspolczynnik=" +
       DB.escape(req.body.sprzedaz.abonament_wspolczynnik) +
+      ", wariant_id=" +
+      DB.escape(req.body.sprzedaz.wariant_id) +
       " WHERE id=" +
       req.body.sprzedaz.id;
     DB.execute(query, res);

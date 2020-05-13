@@ -1,13 +1,15 @@
+DROP TABLE IF EXISTS popyt_wariant_sumy;
+DROP TABLE IF EXISTS popyt_wariant_odbiorcy;
 DROP TABLE IF EXISTS grupy_odbiorcow;
 DROP TABLE IF EXISTS popyt_warianty;
-DROP TABLE IF EXISTS popyt_elementy_sprzedazy;
-DROP TABLE IF EXISTS popyt;
+DROP TABLE IF EXISTS popyt_element_sprzedazy;
 DROP TABLE IF EXISTS popyt_typ_dict;
 DROP TABLE IF EXISTS koszty;
 DROP TABLE IF EXISTS koszty_rodzaje;
 DROP TABLE IF EXISTS koszty_wskazniki;
 DROP TABLE IF EXISTS koszty_typ_dict;
 DROP TABLE IF EXISTS zalozenia;
+DROP TABLE IF EXISTS okresy_dict;
 DROP TABLE IF EXISTS wnioski;
 DROP TABLE IF EXISTS uzytkownicy;
 DROP TABLE IF EXISTS klienci;
@@ -47,6 +49,17 @@ CREATE TABLE wnioski
   nazwa varchar(255) NOT NULL
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE okresy_dict
+(
+  id int NOT NULL primary KEY,
+  typ ENUM("1-12","13-24","25-36")
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO okresy_dict(id,typ) values (1,"1-12");
+INSERT INTO okresy_dict(id,typ) values (2,"13-24");
+INSERT INTO okresy_dict(id,typ) values (3,"25-36");
 
 CREATE TABLE zalozenia
 (
@@ -144,19 +157,6 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO popyt_typ_dict(id,typ) values (1,"woda");
 INSERT INTO popyt_typ_dict(id,typ) values (2,"scieki");
 
-CREATE TABLE popyt
-(
-  id int NOT NULL AUTO_INCREMENT primary KEY,
-  wniosek_id int,
-  FOREIGN KEY (wniosek_id)
-        REFERENCES wnioski(id)
-        ON DELETE CASCADE,
-  typ_id int NOT NULL,
-  FOREIGN KEY (typ_id)
-        REFERENCES popyt_typ_dict(id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE popyt_element_sprzedazy
 (
   id int NOT NULL AUTO_INCREMENT primary KEY,
@@ -173,7 +173,8 @@ CREATE TABLE popyt_element_sprzedazy
   jednostka varchar(255) NOT NULL,
   abonament BOOLEAN,
   abonament_nazwa varchar(255) NOT NULL,
-  abonament_wspolczynnik ENUM("A","B","C","D","E") 
+  abonament_wspolczynnik ENUM("A","B","C","D","E"),
+  wariant_id int
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -184,7 +185,6 @@ CREATE TABLE popyt_warianty
   FOREIGN KEY (element_sprzedazy_id)
         REFERENCES popyt_element_sprzedazy(id)
         ON DELETE CASCADE,
-  okres ENUM("1-12","13-24","25-36"),
   nazwa varchar(255) NOT NULL,
   opis TEXT
 )
@@ -202,5 +202,43 @@ CREATE TABLE grupy_odbiorcow
         REFERENCES popyt_typ_dict(id),     
   nazwa varchar(255) NOT NULL,
   opis TEXT
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE popyt_wariant_odbiorcy
+(
+  id int NOT NULL AUTO_INCREMENT primary KEY,
+  wariant_id int,
+  FOREIGN KEY (wariant_id)
+        REFERENCES popyt_warianty(id)
+        ON DELETE CASCADE,
+  grupy_odbiorcow_id int,
+  FOREIGN KEY (grupy_odbiorcow_id)
+        REFERENCES grupy_odbiorcow(id)
+        ON DELETE CASCADE,
+  okres_id int NOT NULL,
+  FOREIGN KEY (okres_id)
+        REFERENCES okresy_dict(id),
+  sprzedaz numeric,
+  wspolczynnik_alokacji numeric,
+  oplaty_abonament numeric,
+  wspolczynnik_alokacji_abonament numeric,
+  typ ENUM("wg wskaźnika", "jako dopełnienie"),
+  liczba_odbiorcow numeric
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE popyt_wariant_sumy
+(
+  id int NOT NULL AUTO_INCREMENT primary KEY,
+  wariant_id int,
+  FOREIGN KEY (wariant_id)
+        REFERENCES popyt_warianty(id)
+        ON DELETE CASCADE,
+  okres_id int NOT NULL,
+  FOREIGN KEY (okres_id)
+        REFERENCES okresy_dict(id),
+  sprzedaz numeric,
+  oplaty_abonament numeric
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

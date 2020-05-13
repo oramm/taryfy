@@ -48,12 +48,12 @@ class GrupyOdbiorcow {
       ", opis=" +
       DB.escape(req.body.data.opis) +
       " WHERE id=" +
-      req.body.id;
+      DB.escape(req.body.data.id);
     DB.execute(query, res);
   }
 
   static Delete(res, req) {
-    let query = "DELETE FROM grupy_odbiorcow WHERE id = " + req.body.id;
+    let query = "DELETE FROM grupy_odbiorcow WHERE id = " + DB.escape(req.body.data.id);
     DB.execute(query, res);
   }
 }

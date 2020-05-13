@@ -91,7 +91,7 @@ let GrupyAllokacjiControl = (sel: any, label: string, callback: (value: any) => 
 };
 
 let Okresy = ["1-12", "13-24", "25-36"];
-let OkresyControl = (callback: (index: number, value: string)=>void) =>
+let OkresyControl = (callback: (index: number, value: string)=>void, selected_item: number) =>
 {
   return (
     <MDBBtnGroup>
@@ -100,6 +100,7 @@ let OkresyControl = (callback: (index: number, value: string)=>void) =>
           <MDBBtn
             onClick={() => callback(index,name)}
             size="sm"
+            active={selected_item === index+1}
           >
             {name}
           </MDBBtn>

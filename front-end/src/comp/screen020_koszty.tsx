@@ -331,7 +331,7 @@ class Screen020 extends Component<Props, State> {
 
           <MDBInputGroup
             containerClassName="mb-3"
-            prepend="Współczynnik allokacji:"
+            prepend="Współczynnik alokacji:"
             inputs={
               <select
                 className="browser-default custom-select"
