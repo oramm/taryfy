@@ -223,7 +223,7 @@ CREATE TABLE popyt_wariant_odbiorcy
   wspolczynnik_alokacji numeric,
   oplaty_abonament numeric,
   wspolczynnik_alokacji_abonament numeric,
-  typ ENUM("wg wskaźnika", "jako dopełnienie"),
+  typ int,
   liczba_odbiorcow numeric
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -239,6 +239,7 @@ CREATE TABLE popyt_wariant_sumy
   FOREIGN KEY (okres_id)
         REFERENCES okresy_dict(id),
   sprzedaz numeric,
-  oplaty_abonament numeric
+  oplaty_abonament numeric,
+  wskaznik numeric
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

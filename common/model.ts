@@ -186,3 +186,23 @@ export type popyt_zestawienie =
   wariant_nazwa: string;
   grupy_odbiorcow_nazwa: string;
 }
+
+export type ElementSprzedazy = {
+  id: number;
+  wniosek_id: number;
+  typ_id: number;
+  nazwa: string;
+  opis: string;
+  wspolczynnik: string;
+  jednostka: string;
+  abonament: boolean;
+  abonament_nazwa: string;
+  abonament_wspolczynnik: string;
+  wariant_id: number;
+};
+
+export type WariantSymulacji = {
+  id: number;
+  nazwa: string;
+  opis: string;
+};

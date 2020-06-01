@@ -8,6 +8,9 @@ import { Log } from "./log";
 router.post("/select", (req, res) => {
   PopytWarianty.Select(res, req);
 });
+router.post("/select_one", (req, res) => {
+  PopytWarianty.SelectOne(res, req);
+});
 router.post("/select_odbiorcy", (req, res) => {
   PopytWarianty.SelectOdbiorcy(res, req);
 });
@@ -32,10 +35,29 @@ class PopytWarianty {
     DB.execute(query, res);
   }
 
+  static SelectOne(res, req) {
+    let query =
+      "SELECT * from popyt_warianty WHERE id=" +
+      DB.escape(req.body.wariant_symulacji_id);
+    DB.execute(query, res);
+  }
+
   //SELECT grupy_odbiorcow.nazwa, okresy_dict.id, popyt_wariant_odbiorcy.* FROM (okresy_dict, grupy_odbiorcow) LEFT JOIN popyt_wariant_odbiorcy ON grupy_odbiorcow.id = popyt_wariant_odbiorcy.grupy_odbiorcow_id AND okresy_dict.id = popyt_wariant_odbiorcy.okres_id
   static SelectOdbiorcy(res, req) {
     let query =
-      "SELECT grupy_odbiorcow.id as grupy_odbiorcow_id_valid, grupy_odbiorcow.nazwa, okresy_dict.id as okresy_dict_id, popyt_wariant_odbiorcy.*" +
+      "SELECT grupy_odbiorcow.id as grupy_odbiorcow_id_valid," +
+      " grupy_odbiorcow.nazwa,"+
+      " okresy_dict.id as okresy_dict_id, " +
+      " popyt_wariant_odbiorcy.id," +
+      " popyt_wariant_odbiorcy.wariant_id," +
+      " popyt_wariant_odbiorcy.grupy_odbiorcow_id," +
+      " popyt_wariant_odbiorcy.okres_id," +
+      " IFNULL(popyt_wariant_odbiorcy.sprzedaz, 0) as sprzedaz," +
+      " IFNULL(popyt_wariant_odbiorcy.wspolczynnik_alokacji, 0) as sprzedaz_wspolczynnik_alokacji," +
+      " IFNULL(popyt_wariant_odbiorcy.oplaty_abonament, 0) as oplaty_abonament," +
+      " IFNULL(popyt_wariant_odbiorcy.wspolczynnik_alokacji_abonament, 0) as oplaty_abonament_wspolczynnik_a," +
+      " IFNULL(popyt_wariant_odbiorcy.typ, 2) as typ_alokacji_abonament," +
+      " IFNULL(popyt_wariant_odbiorcy.liczba_odbiorcow, 0) as liczba_odbiorcow" +
       " FROM (okresy_dict, grupy_odbiorcow)" +
       " LEFT JOIN popyt_wariant_odbiorcy ON grupy_odbiorcow.id = popyt_wariant_odbiorcy.grupy_odbiorcow_id" +
       " AND okresy_dict.id = popyt_wariant_odbiorcy.okres_id" +
@@ -86,18 +108,18 @@ class PopytWarianty {
       DB.escape(data.oplaty_abonament) +
       "," +
       DB.escape(data.wspolczynnik_alokacji_abonament) +
-      "," +
+      ',"' +
       DB.escape(data.typ) +
-      "," +
+      '",' +
       DB.escape(data.liczba_odbiorcow) +
       ")"
     );
   }
 
   static QueryInsertWariantSumy(data, wariant_id) {
-    Log(0,"QueryInsertWariantSumy data", data);
+    Log(0, "QueryInsertWariantSumy data", data);
     return (
-      "INSERT INTO popyt_wariant_sumy (wariant_id, okres_id, sprzedaz, oplaty_abonament) VALUES (" +
+      "INSERT INTO popyt_wariant_sumy (wariant_id, okres_id, sprzedaz, oplaty_abonament, wskaznik) VALUES (" +
       wariant_id +
       "," +
       DB.escape(data.okres_id) +
@@ -105,6 +127,8 @@ class PopytWarianty {
       DB.escape(data.sprzedaz_docelowa) +
       "," +
       DB.escape(data.oplaty_abonament_docelowa) +
+      "," +
+      DB.escape(data.wskaznik) +
       ")"
     );
   }
