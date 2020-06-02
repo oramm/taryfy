@@ -46,7 +46,7 @@ class PopytWarianty {
   static SelectOdbiorcy(res, req) {
     let query =
       "SELECT grupy_odbiorcow.id as grupy_odbiorcow_id_valid," +
-      " grupy_odbiorcow.nazwa,"+
+      " grupy_odbiorcow.nazwa," +
       " okresy_dict.id as okresy_dict_id, " +
       " popyt_wariant_odbiorcy.id," +
       " popyt_wariant_odbiorcy.wariant_id," +
@@ -93,6 +93,11 @@ class PopytWarianty {
   // }
 
   static QueryInsertWariantOdbiorcy(data, wariant_id) {
+    Log(
+      0,
+      "QueryInsertWariantOdbiorcy wariant_d=" + wariant_id + " , data:",
+      data
+    );
     return (
       "INSERT INTO popyt_wariant_odbiorcy (wariant_id, grupy_odbiorcow_id, okres_id, sprzedaz, wspolczynnik_alokacji, oplaty_abonament, wspolczynnik_alokacji_abonament, typ, liczba_odbiorcow) VALUES (" +
       wariant_id +
@@ -103,13 +108,13 @@ class PopytWarianty {
       "," +
       DB.escape(data.sprzedaz) +
       "," +
-      DB.escape(data.wspolczynnik_alokacji) +
+      DB.escape(data.sprzedaz_wspolczynnik_alokacji) +
       "," +
       DB.escape(data.oplaty_abonament) +
       "," +
-      DB.escape(data.wspolczynnik_alokacji_abonament) +
+      DB.escape(data.oplaty_abonament_wspolczynnik_a) +
       ',"' +
-      DB.escape(data.typ) +
+      DB.escape(data.typ_alokacji_abonament) +
       '",' +
       DB.escape(data.liczba_odbiorcow) +
       ")"

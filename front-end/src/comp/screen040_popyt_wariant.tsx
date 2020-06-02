@@ -19,6 +19,7 @@ import {
   MDBBtn,
 } from "mdbreact";
 import { OkresyControl } from "./modal_dialogs";
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 
 enum CalcChangeSource {
   sprzedaz_wartosc,
@@ -30,13 +31,13 @@ enum CalcChangeSource {
   abonament_wspolczynnik,
 }
 
-enum LiczenieAbonamentu {
+export enum LiczenieAbonamentu {
   wskaznik,
   dopelnienie,
   procent,
 }
 
-type WariantSymulacjiGrupy = {
+export type WariantSymulacjiGrupy = {
   grupy_odbiorcow_id_valid: number;
   nazwa: string;
   okresy_dict_id: number;
@@ -75,11 +76,11 @@ type Props = {
 
 type State = {
   typ_id: number;
-  grupy_odbiorcow: GrupyOdbiorcow[];
+  //grupy_odbiorcow: GrupyOdbiorcow[];
   grupy: WariantSymulacjiGrupy[];
   grupy_wybrane: number[];
   sumy: WariantSymulacjiSumy[];
-  sumy_wybrane: number;
+  suma_wybrana: number;
   okres_id: number;
   wariant: WariantSymulacji;
   wariant_okres_id: number;
@@ -88,11 +89,11 @@ type State = {
 export default class ModalWariantSymulacji extends Component<Props, State> {
   state: State = {
     typ_id: 1,
-    grupy_odbiorcow: [],
+    //grupy_odbiorcow: [],
     grupy: [],
     grupy_wybrane: [],
     sumy: [],
-    sumy_wybrane: -1,
+    suma_wybrana: -1,
     okres_id: 0,
     wariant: {
       id: 0,
@@ -117,11 +118,14 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           opis: "",
         },
       });
+      this.loadDataGrupyOdbiorcow();
+      this.loadDataSumy();
     } else {
-      this.loadDataWariantSymulacji();
+      this.loadDataWariantSymulacji(() => {
+        this.loadDataGrupyOdbiorcow();
+        this.loadDataSumy();
+      });
     }
-    this.loadDataGrupyOdbiorcow();
-    this.loadDataSumy();
   }
 
   dodaj = () => {
@@ -199,7 +203,31 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
     );
   };
 
-  loadDataWariantSymulacji = () => {
+  selectSuma = (okres_id: number) => {
+    console.log("ModalWariantSymulacji selectSuma okres_id:", okres_id);
+    this.setState(
+      (prevState) =>
+        update(prevState, {
+          suma_wybrana: {
+            $apply: () => {
+              let suma_index = 0;
+              prevState.sumy.map((item, index) => {
+                if (okres_id === Number(item.okres_id)) {
+                  suma_index = index;
+                }
+              });
+              return suma_index;
+            },
+          },
+          wariant_okres_id: { $set: okres_id },
+        }),
+      () => {
+        console.log("ModalWariantSymulacji selectSuma state:", this.state);
+      }
+    );
+  };
+
+  loadDataWariantSymulacji = (next?: any) => {
     post(
       "/popyt_warianty_symulacji/select_one",
       {
@@ -215,17 +243,20 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           {
             wariant: response.data[0],
           },
-          () =>
+          () => {
             console.log(
               "ModalWariantSymulacji loadDataWariantSymulacji state:",
               this.state
-            )
+            );
+            next && next();
+          }
         );
       }
     );
   };
 
   loadDataGrupyOdbiorcow = () => {
+    console.log("Screen040 loadDataGrupyOdbiorcow before state:", this.state);
     post(
       "/popyt_warianty_symulacji/select_odbiorcy",
       {
@@ -276,12 +307,11 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
         this.setState(
           {
             sumy: sumy,
-            sumy_wybrane: this.state.wariant_okres_id - 1,
+            suma_wybrana: this.state.wariant_okres_id - 1,
           },
           () => {
             console.log("Screen040 loadDataSumy state:", this.state);
-            this.selectGrupaOdbiorcow(this.state.wariant_okres_id);
-            //            this.modalWariantSymulacjiRecalculate(2);
+            this.selectSuma(this.state.wariant_okres_id);
           }
         );
       }
@@ -310,12 +340,13 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
   ) => {
     let ret: any;
     this.state.grupy_wybrane.map((item: any, index: number) => {
-      ret = func(this.state.grupy[item], index);
+      ret = func(this.state.grupy[item], item);
     });
     return ret;
   };
 
   Calculate = (change_source: CalcChangeSource) => {
+    console.log("Calculate was called change_source:", change_source);
     if (!this.state.sumy) {
       console.log(
         "Calculate error, this.state.wariant_symulacji_sumy not defined"
@@ -349,7 +380,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           if (this.state.sumy)
             grupa.sprzedaz =
               (grupa.sprzedaz_wspolczynnik_alokacji *
-                this.state.sumy[this.state.sumy_wybrane].sprzedaz_docelowa) /
+                this.state.sumy[this.state.suma_wybrana].sprzedaz_docelowa) /
               100;
         } else if (change_source === CalcChangeSource.abonament_wartosc) {
           if (oplaty_abonament_sum > 0) {
@@ -365,7 +396,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
             if (this.state.sumy)
               grupa.oplaty_abonament =
                 (grupa.oplaty_abonament_wspolczynnik_a *
-                  this.state.sumy[this.state.sumy_wybrane]
+                  this.state.sumy[this.state.suma_wybrana]
                     .oplaty_abonament_docelowa) /
                 100;
           } else if (
@@ -374,7 +405,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
             if (this.state.sumy)
               grupa.oplaty_abonament_wspolczynnik_a =
                 grupa.sprzedaz_wspolczynnik_alokacji *
-                this.state.sumy[this.state.sumy_wybrane].wskaznik;
+                this.state.sumy[this.state.suma_wybrana].wskaznik;
           } else if (
             grupa.typ_alokacji_abonament === LiczenieAbonamentu.dopelnienie
           ) {
@@ -391,6 +422,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
               (grupa.sprzedaz_wspolczynnik_alokacji / sum1) * (1 - sum2);
           }
         }
+        //todo: move it out of loop, here only collect data
         this.setState(
           (prevState) => {
             return update(prevState, { grupy: { [index]: { $set: grupa } } });
@@ -426,12 +458,12 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
               (prevState) => {
                 return update(prevState, {
                   sumy: {
-                    [prevState.sumy_wybrane]: {
+                    [prevState.suma_wybrana]: {
                       sprzedaz: { $set: sprzedaz_sum },
                       sprzedaz_roznica: {
                         $set:
                           sprzedaz_sum -
-                          prevState.sumy[prevState.sumy_wybrane]
+                          prevState.sumy[prevState.suma_wybrana]
                             .sprzedaz_docelowa,
                       },
                       wspolczynnik_alokacji: {
@@ -441,7 +473,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                       oplaty_abonament_roznica: {
                         $set:
                           oplaty_abonament_sum -
-                          prevState.sumy[prevState.sumy_wybrane]
+                          prevState.sumy[prevState.suma_wybrana]
                             .oplaty_abonament_docelowa,
                       },
                       wspolczynnik_alokacji_abonament: {
@@ -451,7 +483,11 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                   },
                 });
               },
-              () => console.log("Screen040 calculate state:", this.state)
+              () =>
+                console.log(
+                  "Screen040 ModalWariantSymulacji calculate state:",
+                  this.state
+                )
             );
           }
         );
@@ -460,7 +496,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
   };
 
   render() {
-    console.log("Screen040 render state:", this.state);
+    console.log("Screen040 ModalWariantSymulacji render state:", this.state);
     if (!this.state.sumy || this.state.sumy.length === 0) return <></>;
     else
       return (
@@ -508,6 +544,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                     {OkresyControl((index, value) => {
                       console.log("OkresyControl value:", value);
                       this.selectGrupaOdbiorcow(index + 1);
+                      this.selectSuma(index + 1);
                     }, this.state.wariant_okres_id)}
                   </td>
                 </tr>
@@ -532,7 +569,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                               style={{ width: "100px" }}
                               type="text"
                               value={
-                                this.state.sumy[this.state.sumy_wybrane]
+                                this.state.sumy[this.state.suma_wybrana]
                                   .wskaznik
                               }
                               onChange={(event) => {
@@ -546,7 +583,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                     );
                                     return update(prevState, {
                                       sumy: {
-                                        [prevState.sumy_wybrane]: {
+                                        [prevState.suma_wybrana]: {
                                           wskaznik: { $set: Number(value) },
                                         },
                                       },
@@ -690,7 +727,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                             this.state
                                           );
                                           this.Calculate(
-                                            CalcChangeSource.abonament_wspolczynnik
+                                            CalcChangeSource.abonament_procent
                                           );
                                         }
                                       );
@@ -779,7 +816,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   this.setState((prevState) =>
                                     update(prevState, {
                                       grupy: {
-                                        [index]: {
+                                        [item]: {
                                           liczba_odbiorcow: {
                                             $set: Number(value),
                                           },
@@ -795,23 +832,23 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                         <tr>
                           <td>Suma</td>
                           <td>
-                            {this.state.sumy[this.state.sumy_wybrane].sprzedaz}
+                            {this.state.sumy[this.state.suma_wybrana].sprzedaz}
                           </td>
                           <td>
                             {
-                              this.state.sumy[this.state.sumy_wybrane]
+                              this.state.sumy[this.state.suma_wybrana]
                                 .wspolczynnik_alokacji
                             }
                           </td>
                           <td>
                             {
-                              this.state.sumy[this.state.sumy_wybrane]
+                              this.state.sumy[this.state.suma_wybrana]
                                 .oplaty_abonament
                             }
                           </td>
                           <td>
                             {
-                              this.state.sumy[this.state.sumy_wybrane]
+                              this.state.sumy[this.state.suma_wybrana]
                                 .wspolczynnik_alokacji_abonament
                             }
                           </td>
@@ -830,7 +867,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                               style={{ width: "100px" }}
                               type="text"
                               value={
-                                this.state.sumy[this.state.sumy_wybrane]
+                                this.state.sumy[this.state.suma_wybrana]
                                   .sprzedaz_docelowa
                               }
                               onChange={(event) => {
@@ -839,7 +876,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   (prevState) =>
                                     update(prevState, {
                                       sumy: {
-                                        [prevState.sumy_wybrane]: {
+                                        [prevState.suma_wybrana]: {
                                           sprzedaz_docelowa: {
                                             $set: Number(value),
                                           },
@@ -862,7 +899,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                               style={{ width: "100px" }}
                               type="text"
                               value={
-                                this.state.sumy[this.state.sumy_wybrane]
+                                this.state.sumy[this.state.suma_wybrana]
                                   .oplaty_abonament_docelowa
                               }
                               onChange={(event) => {
@@ -871,7 +908,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   (prevState) =>
                                     update(prevState, {
                                       sumy: {
-                                        [prevState.sumy_wybrane]: {
+                                        [prevState.suma_wybrana]: {
                                           oplaty_abonament_docelowa: {
                                             $set: Number(value),
                                           },
@@ -898,14 +935,14 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                           <td>Różnica</td>
                           <td>
                             {
-                              this.state.sumy[this.state.sumy_wybrane]
+                              this.state.sumy[this.state.suma_wybrana]
                                 .sprzedaz_roznica
                             }
                           </td>
                           <td></td>
                           <td>
                             {
-                              this.state.sumy[this.state.sumy_wybrane]
+                              this.state.sumy[this.state.suma_wybrana]
                                 .oplaty_abonament_roznica
                             }
                           </td>

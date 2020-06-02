@@ -236,7 +236,7 @@ export default class Screen extends Component<Props, State> {
       (response) => {
         console.log("loadDataElementySprzedazy response:", response);
         let selected: boolean =
-        response.data.length > this.state.elementy_sprzedazy_selected;
+          response.data.length > this.state.elementy_sprzedazy_selected;
         this.setState(
           () => {
             return {
@@ -372,7 +372,7 @@ export default class Screen extends Component<Props, State> {
               const { value } = event.currentTarget;
               this.setState(
                 (prevState) => {
-                  update(prevState, {
+                  return update(prevState, {
                     modal_sprzedaz: { nazwa: { $set: value } },
                   });
                 },
@@ -392,7 +392,7 @@ export default class Screen extends Component<Props, State> {
               const { value } = event.currentTarget;
               this.setState(
                 (prevState) => {
-                  update(prevState, {
+                  return update(prevState, {
                     modal_sprzedaz: { opis: { $set: value } },
                   });
                 },
@@ -410,9 +410,18 @@ export default class Screen extends Component<Props, State> {
             value={this.state.modal_sprzedaz.jednostka}
             onChange={(event) => {
               const { value } = event.currentTarget;
-              let state = this.state;
-              state.modal_sprzedaz.jednostka = value;
-              this.setState(state);
+              this.setState(
+                (prevState) => {
+                  return update(prevState, {
+                    modal_sprzedaz: { jednostka: { $set: value } },
+                  });
+                },
+                () =>
+                  console.log(
+                    "Screen040 modalElementSprzedarzyOn jednostka state:",
+                    this.state
+                  )
+              );
             }}
           ></MDBInput>
           {GrupyAllokacjiControl(
@@ -962,8 +971,11 @@ export default class Screen extends Component<Props, State> {
                     </tr>
                     <tr>
                       <td style={{ padding: 2 }}>
-                        {OkresyControl((index, value) => {},
-                        this.state.okres_id)}
+                        {OkresyControl((index, value) => {
+                          this.setState({ okres_id: index + 1 }, () =>
+                            this.loadDataZestawienie()
+                          );
+                        }, this.state.okres_id)}
                       </td>
                       <td style={{ padding: 2 }}>
                         <MDBBox>
