@@ -553,15 +553,15 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                     <MDBTable bordered>
                       <MDBTableBody>
                         <tr>
-                          <td></td>
-                          <td>
+                          <th></th>
+                          <th>
                             sprzedaż, m<sup>3</sup>
-                          </td>
-                          <td>A, %</td>
-                          <td>opłaty ab., zł</td>
-                          <td>B, %</td>
-                          <td>suma, zł</td>
-                          <td>
+                          </th>
+                          <th>A, %</th>
+                          <th>opłaty ab., zł</th>
+                          <th>B, %</th>
+                          <th>suma, zł</th>
+                          <th>
                             wg wskaźnika
                             <MDBInput
                               noTag
@@ -601,14 +601,14 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                 );
                               }}
                             />
-                          </td>
-                          <td>jako dopełnienie</td>
-                          <td>jako % z całości</td>
-                          <td>liczba odbiorców</td>
+                          </th>
+                          <th>jako dopełnienie</th>
+                          <th>jako % z całości</th>
+                          <th>liczba odbiorców</th>
                         </tr>
                         {this.state.grupy_wybrane.map((item, index) => (
                           <tr key={index}>
-                            <td>{this.state.grupy[item].nazwa}</td>
+                            <th>{this.state.grupy[item].nazwa}</th>
                             <td>
                               <MDBInput
                                 noTag
@@ -830,7 +830,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                           </tr>
                         ))}
                         <tr>
-                          <td>Suma</td>
+                          <th>Suma</th>
                           <td>
                             {this.state.sumy[this.state.suma_wybrana].sprzedaz}
                           </td>
@@ -859,7 +859,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                           <td></td>
                         </tr>
                         <tr>
-                          <td>Suma docelowa</td>
+                          <th>Suma docelowa</th>
                           <td>
                             <MDBInput
                               noTag
@@ -932,7 +932,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                           <td></td>
                         </tr>
                         <tr>
-                          <td>Różnica</td>
+                          <th>Różnica</th>
                           <td>
                             {
                               this.state.sumy[this.state.suma_wybrana]

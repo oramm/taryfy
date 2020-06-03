@@ -558,25 +558,50 @@ export default class Screen extends Component<Props, State> {
         >
           Dodaj nowy element sprzedaży
         </MDBBtn>
-        <MDBTable small>
+        <MDBTable className="m-0">
           <MDBTableBody>
             {this.state.elementy_sprzedazy.map((item, index) => (
               <tr
                 color="teal lighten-1"
                 key={index}
-                onClick={() => {
-                  console.log("elementy_sprzedazy_selected item:", item);
-                  console.log("elementy_sprzedazy_selected index:", index);
-                  this.setState({ elementy_sprzedazy_selected: index }, () =>
-                    this.loadDataWariantySymulacji()
-                  );
-                }}
+                onClick={
+                  this.state.elementy_sprzedazy_selected !== index
+                    ? () => {
+                        console.log("elementy_sprzedazy_selected item:", item);
+                        console.log(
+                          "elementy_sprzedazy_selected index:",
+                          index
+                        );
+                        this.setState(
+                          { elementy_sprzedazy_selected: index },
+                          () => this.loadDataWariantySymulacji()
+                        );
+                      }
+                    : () => {}
+                }
               >
-                <td className="p-0" color="teal lighten-1">
-                  <MDBBox className="left p-0 font-weight-bold">
-                    {item.nazwa}
-                  </MDBBox>
-                  <MDBBox className="left p-0">{item.opis}</MDBBox>
+                <td
+                  className="p-0 w-100"
+                  // className={
+                  //   this.state.elementy_sprzedazy_selected === index
+                  //     ? "p-0 selected"
+                  //     : "p-0"
+                  // }
+                  // color="teal lighten-1"
+                >
+                  <div
+                    //className="border rounded mb-0 pl-1"
+                    className={
+                      this.state.elementy_sprzedazy_selected === index
+                        ? "rounded pl-1 selected"
+                        : "p-0 selectable"
+                    }
+                  >
+                    <MDBBox className="left p-0 pl-1 font-weight-bold">
+                      {item.nazwa}
+                    </MDBBox>
+                    <MDBBox className="left p-0 pl-1">{item.opis}</MDBBox>
+                  </div>
                 </td>
                 <td className="p-0">
                   <MDBBtn
@@ -587,6 +612,8 @@ export default class Screen extends Component<Props, State> {
                   >
                     Usuń
                   </MDBBtn>
+                </td>
+                <td className="p-0">
                   <MDBBtn
                     className="float-right p-2 m-1"
                     size="sm"
@@ -710,11 +737,11 @@ export default class Screen extends Component<Props, State> {
             Dodaj nowy wariant symulacji
           </MDBBtn>
           {this.state.warianty_symulacji.length > 0 ? (
-            <MDBTable small>
+            <MDBTable className="m-0">
               <MDBTableBody>
                 {this.state.warianty_symulacji.map((item, index) => (
                   <tr key={index}>
-                    <td
+                    {/* <td
                       onClick={(event) =>
                         this.onWariantSelect(item, index, event)
                       }
@@ -731,17 +758,31 @@ export default class Screen extends Component<Props, State> {
                         type="radio"
                         id="radioWarianty"
                       />
-                    </td>
+                    </td> */}
                     <td
-                      className="p-0"
+                      className="p-0 w-100"
                       onClick={(event) =>
+                        this.state.elementy_sprzedazy[
+                          this.state.elementy_sprzedazy_selected
+                        ].wariant_id !== item.id &&
                         this.onWariantSelect(item, index, event)
                       }
                     >
-                      <MDBBox className="left p-0 font-weight-bold">
-                        {item.nazwa}
-                      </MDBBox>
-                      <MDBBox className="left p-0">{item.opis}</MDBBox>
+                      <div
+                        //className="border rounded mb-0 pl-1"
+                        className={
+                          this.state.elementy_sprzedazy[
+                            this.state.elementy_sprzedazy_selected
+                          ].wariant_id === item.id
+                            ? "rounded pl-1 selected"
+                            : "p-0 selectable"
+                        }
+                      >
+                        <MDBBox className="left p-0 font-weight-bold pl-1">
+                          {item.nazwa}
+                        </MDBBox>
+                        <MDBBox className="left p-0 pl-1">{item.opis}</MDBBox>
+                      </div>
                     </td>
                     <td className="p-0">
                       <MDBBtn
@@ -752,6 +793,8 @@ export default class Screen extends Component<Props, State> {
                       >
                         Usuń
                       </MDBBtn>
+                    </td>
+                    <td className="p-0">
                       <MDBBtn
                         className="float-right p-2 m-1"
                         size="sm"
@@ -849,7 +892,7 @@ export default class Screen extends Component<Props, State> {
         if (item.element_sprzedazy_abonament)
           row[2].push(
             "<rowSpan>" +
-              item.element_sprzedazy_wspolczynnik +
+              item.element_sprzedazy_abonament_wspolczynnik +
               " " +
               item.wariant_nazwa
           );
@@ -866,14 +909,14 @@ export default class Screen extends Component<Props, State> {
       <MDBTable bordered className="p-0">
         <MDBTableHead>
           <tr>
-            <td>Lp.</td>
-            <td>Współczynnik alokacji</td>
-            <td>
+            <th>Lp.</th>
+            <th>Współczynnik alokacji</th>
+            <th>
               Wyszczególnienie w okresie od 25 do 36 miesiąca obowiązywania
               nowej taryfy
-            </td>
-            <td>Jedn. Miary</td>
-            <td colSpan={first_row.length}>Taryfowa grupa odbiorców usług</td>
+            </th>
+            <th>Jedn. Miary</th>
+            <th colSpan={first_row.length}>Taryfowa grupa odbiorców usług</th>
           </tr>
         </MDBTableHead>
         <MDBTableBody style={{ width: "100%" }}>
@@ -934,10 +977,14 @@ export default class Screen extends Component<Props, State> {
                           borderRight: 1,
                         }}
                       >
-                        {this.elementySprzedazy()}
+                        <div className={"rounded p-0 border"}>
+                          {this.elementySprzedazy()}
+                        </div>
                       </td>
                       <td style={{ width: "50%", padding: 2, paddingLeft: 10 }}>
-                        {this.wariantySymulacji()}
+                        <div className={"rounded p-0 border"}>
+                          {this.wariantySymulacji()}
+                        </div>
                       </td>
                     </tr>
                   </MDBTableBody>
