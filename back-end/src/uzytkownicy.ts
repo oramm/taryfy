@@ -60,6 +60,7 @@ class Uzytkownicy {
                 klient_id: result[0].klient_id,
                 id: result[0].id,
                 nazwa: result[0].nazwa,
+                uprawnienia: result[0].uprawnienia,
               },
               //todo: it is used in indes.ts, move it to one place
               "g6asdfbw4yhdfvqwe4yfg2365burthff6ui47irtfdgwgh45wv4hsdf0zq1x08lqz34r54brwer4ddwv54t67uhe5rtv",
@@ -80,6 +81,7 @@ class Uzytkownicy {
   static async insert(user: {
     nazwa: string;
     haslo: string;
+    uprawnienia: string;
     klient_nazwa: string;
   }) {
     Log(0, "Uzytkownicy insert received user=", user);
@@ -114,13 +116,15 @@ class Uzytkownicy {
                   Log(0, "Uzytkownicy.insert hash err=", err);
                 } else {
                   let query =
-                    "INSERT INTO uzytkownicy (klient_id, nazwa, haslo) SELECT  \
+                    "INSERT INTO uzytkownicy (klient_id, nazwa, haslo, uprawnienia) SELECT  \
                     (SELECT id FROM klienci WHERE nazwa LIKE " +
                     DB.escape(user.klient_nazwa) +
                     ")," +
                     DB.escape(user.nazwa) +
                     "," +
                     DB.escape(hash) +
+                    "," +
+                    DB.escape(user.uprawnienia) +
                     " WHERE NOT EXISTS (SELECT * FROM uzytkownicy WHERE nazwa=" +
                     DB.escape(user.nazwa) +
                     ") AND EXISTS (SELECT * FROM klienci WHERE nazwa LIKE " +

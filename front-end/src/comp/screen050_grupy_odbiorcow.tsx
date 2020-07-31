@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import { MDBBtn, MDBBox, MDBTable, MDBTableBody } from "mdbreact";
+import { MDBBtn, MDBBox, MDBTable, MDBTableBody, MDBIcon } from "mdbreact";
 import { post, cancel } from "./post";
 
 import { ModalDialogs, ModalDialogsGetFake } from "./modal_dialogs";
 
 type Props = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
   modal_dialogs: ModalDialogs;
@@ -26,7 +25,6 @@ let DataEmpty: Data = {
 };
 
 type State = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
   data: Data[];
@@ -39,7 +37,6 @@ type State = {
 
 export default class Screen extends Component<Props, State> {
   state: State = {
-    callback: (index: number) => {},
     wniosek_id: 0,
     typ_id: 1,
     data: [],
@@ -52,7 +49,6 @@ export default class Screen extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state.callback = props.callback;
     this.state.wniosek_id = props.wniosek_id;
     this.state.modal_dialogs = props.modal_dialogs;
   }
@@ -151,6 +147,8 @@ export default class Screen extends Component<Props, State> {
           size="sm"
           className="float-left"
           style={{ width: "250px" }}
+          color="mdb-color"
+          outline
           onClick={() =>
             this.state.modal_dialogs.opisOn(
               "Dodaj nową grupę odbiorców",
@@ -162,29 +160,27 @@ export default class Screen extends Component<Props, State> {
         >
           Dodaj nową grupę odbiorców
         </MDBBtn>
-        <MDBTable small>
+        <MDBTable className="_row bs-2">
           <MDBTableBody>
             {this.state.data.map((item, index) => (
               <tr key={index}>
-                <td className="p-0">
+                <td className="w-100">
                   <MDBBox className="left p-0 font-weight-bold">
                     {item.nazwa}
                   </MDBBox>
                   <MDBBox className="left p-0">{item.opis}</MDBBox>
                 </td>
-                <td className="p-0">
-                  <MDBBtn
-                    className="float-right p-2 m-1"
-                    size="sm"
-                    style={{ width: "60px" }}
+                <td className="align-middle">
+                  <div
                     onClick={() => this.onGrupyOdbiorcowUsun(item.id)}
+                    className="rounded flat_button pointer"
                   >
-                    Usuń
-                  </MDBBtn>
-                  <MDBBtn
-                    className="float-right p-2 m-1"
-                    size="sm"
-                    style={{ width: "60px" }}
+                    <MDBIcon far icon="trash-alt p-1" />
+                  </div>
+                </td>
+                <td className="align-middle">
+                  <div
+                    className="rounded flat_button pointer"
                     onClick={() => {
                       this.state.modal_dialogs.opisOn(
                         "Edytuj grupę odbiorców",
@@ -195,8 +191,8 @@ export default class Screen extends Component<Props, State> {
                       );
                     }}
                   >
-                    Edytuj
-                  </MDBBtn>
+                    <MDBIcon icon="pen p-1" />
+                  </div>
                 </td>
               </tr>
             ))}

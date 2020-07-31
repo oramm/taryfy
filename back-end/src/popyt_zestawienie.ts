@@ -26,6 +26,8 @@ class PopytZestawienie {
       " WHERE" +
       " popyt_element_sprzedazy.wniosek_id = " +
       DB.escape(req.body.wniosek_id) +
+      " AND popyt_element_sprzedazy.typ_id = " +
+      DB.escape(req.body.typ_id) +
       " AND popyt_wariant_odbiorcy.okres_id = " +
       DB.escape(req.body.okres_id) +
       " AND popyt_element_sprzedazy.wariant_id = popyt_wariant_odbiorcy.wariant_id" +

@@ -27,7 +27,7 @@ class DB {
     this._counter = 0;
   }
 
-  public escape = (text: string): string => {
+  public escape = (text: any): string => {
     return mysql.escape(text);
   };
 

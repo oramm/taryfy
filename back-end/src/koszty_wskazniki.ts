@@ -8,13 +8,17 @@ import { DB } from "./db_util";
 router.post("/select", (req, res) => {
   KosztyWskazniki.SelectAfterInsertWhenEmpty(res, req);
 });
-// router.post("/insert", (req, res) => {
-//   KosztyWskazniki.Insert(res, req);
-// });
+
 router.post("/update", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   KosztyWskazniki.Update(res, req);
 });
 router.post("/delete", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   KosztyWskazniki.Delete(res, req);
 });
 
@@ -45,22 +49,6 @@ class KosztyWskazniki {
       req.body.typ_id;
     DB.execute(query, res);
   }
-
-//   static Insert(res, req) {
-//     let query =
-//       "INSERT INTO koszty_wskazniki (wniosek_id, typ_id, wskaznik_1, wskaznik_2, wskaznik_3) VALUES (" +
-//       req.body.wniosek_id +
-//       "," +
-//       req.body.typ_id +
-//       "," +
-//       DB.escape(req.body.wskaznik_1) +
-//       "," +
-//       DB.escape(req.body.wskaznik_2) +
-//       "," +
-//       DB.escape(req.body.wskaznik_3) +
-//       ")";
-//     DB.execute(query, res);
-//   }
 
   static Update(res, req) {
     let query =

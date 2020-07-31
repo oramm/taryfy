@@ -50,7 +50,7 @@ class Screen005 extends Component<Props, State> {
   onLogin() {
     //todo: validate eg not empty
     console.log("Screen050: onLogin");
-    
+
     post(
       "/uzytkownicy/login",
       this.state.data,
@@ -61,7 +61,7 @@ class Screen005 extends Component<Props, State> {
         } else {
           //todo: check when it happend
           console.log("Screen050: onLogin error");
-          this.setState({login_error: true});
+          this.setState({ login_error: true });
           // this.state.on_modal_error &&
           //   this.state.on_modal_error("Nie udało się załogwać", "", () => {});
         }
@@ -69,7 +69,7 @@ class Screen005 extends Component<Props, State> {
       (error) => {
         //todo: check error type and display message
         console.log("Screen050: onLogin error");
-        this.setState({login_error: true});
+        this.setState({ login_error: true });
         // this.state.on_modal_error &&
         //   this.state.on_modal_error("Nie udało się załogwać", "", () => {});
       }
@@ -83,13 +83,13 @@ class Screen005 extends Component<Props, State> {
   componentWillUnmount() {
     cancel();
   }
-  
+
   render() {
     console.log("Screen050 zalozenia render(), this.state", this.state);
     return (
       <>
         <MDBNavbar
-          color="default-color"
+          color="navbar-background"
           dark
           expand="md"
           style={{ width: "100%" }}
@@ -147,7 +147,9 @@ class Screen005 extends Component<Props, State> {
             </MDBTableBody>
           </MDBTable>
           <MDBBox display="flex" justifyContent="center">
-            <MDBBtn onClick={() => this.onLogin()}>Zaloguj</MDBBtn>
+            <MDBBtn color="mdb-color" onClick={() => this.onLogin()}>
+              Zaloguj
+            </MDBBtn>
           </MDBBox>
         </MDBContainer>
       </>
@@ -155,4 +157,4 @@ class Screen005 extends Component<Props, State> {
   }
 }
 
-export {Screen005 as Screen005_login};
+export { Screen005 as Screen005_login };

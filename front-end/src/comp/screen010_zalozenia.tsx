@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import update from "immutability-helper";
 import {
   MDBContainer,
   MDBInput,
@@ -105,7 +106,11 @@ class Screen010 extends Component<Props, ComponentState> {
     return (
       <MDBContainer aligncontent="start">
         {this.state.wniosek_id > 0 && (
-          <React.Fragment>
+          <form
+            className="needs-validation"
+            onSubmit={this.onZapiszZmiany}
+            noValidate
+          >
             <MDBTable>
               <MDBTableHead>
                 <tr>
@@ -123,12 +128,17 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
+                      type="number"
+                      required
                       value={this.state.data.inflacja_1}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.inflacja_1 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { inflacja_1: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -136,15 +146,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.inflacja_2}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.inflacja_2 = isNaN(Number.parseInt(value))
-                          ? 0
-                          : Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { inflacja_2: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -152,13 +163,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.inflacja_3}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.inflacja_3 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { inflacja_3: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -169,13 +183,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.wskaznik_cen_1}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.wskaznik_cen_1 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { wskaznik_cen_1: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -183,13 +200,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.wskaznik_cen_2}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.wskaznik_cen_2 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { wskaznik_cen_2: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -197,13 +217,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.wskaznik_cen_3}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.wskaznik_cen_3 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { wskaznik_cen_3: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -214,13 +237,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.marza_zysku_1}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.marza_zysku_1 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { marza_zysku_1: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -228,13 +254,16 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.marza_zysku_2}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.marza_zysku_2 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { marza_zysku_2: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
@@ -242,25 +271,30 @@ class Screen010 extends Component<Props, ComponentState> {
                     <MDBInput
                       noTag
                       className="text-right"
-                      type="text"
+                      type="number"
                       value={this.state.data.marza_zysku_3}
                       onChange={(event) => {
-                        const { value } = event.currentTarget;
-                        let stateData = this.state.data;
-                        stateData.marza_zysku_3 = Number.parseInt(value);
-                        this.setState({ data: stateData });
+                        const value = event.currentTarget.value;
+                        if (Number(value) || value === "0")
+                          this.setState((prevState) => {
+                            return update(prevState, {
+                              data: { marza_zysku_3: { $set: Number(value) } },
+                            });
+                          });
                       }}
                     />
                   </td>
                 </tr>
               </MDBTableBody>
             </MDBTable>
-            <MDBBtn onClick={() => this.onZapiszZmiany()}>Zapisz zmiany</MDBBtn>
-          </React.Fragment>
+            <MDBBtn color="mdb-color" outline onClick={() => this.onZapiszZmiany()}>
+              Zapisz zmiany
+            </MDBBtn>
+          </form>
         )}
       </MDBContainer>
     );
   }
 }
 
-export{Screen010 as Screen010_zalozenia}
+export { Screen010 as Screen010_zalozenia };

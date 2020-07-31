@@ -11,30 +11,24 @@ import {
   MDBModalBody,
   MDBModalFooter,
   MDBInputGroup,
+  MDBIcon,
 } from "mdbreact";
 import { post, cancel } from "./post";
 
-import { ModalDialogs, ModalDialogsGetFake } from "./modal_dialogs";
+import { ModalDialogs, ModalDialogsGetFake, ElementPrzychoduControl } from "./modal_dialogs";
+import { ElementPrzychodu, KosztyRodzaje } from "../../../common/model";
 
 type Props = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
   modal_dialogs: ModalDialogs;
 };
 
-type RodzajeKosztowData = {
-  id: number;
-  nazwa: string;
-  opis: string;
-  wspolczynnik: string;
-};
-
 type State = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
-  koszty_rodzaje: RodzajeKosztowData[];
+  koszty_rodzaje: KosztyRodzaje[];
+  elementy_przychodow: ElementPrzychodu[];
   wskaznik_id: number;
   wskaznik_1: string;
   wskaznik_2: string;
@@ -42,27 +36,29 @@ type State = {
   modal_dialogs: ModalDialogs;
   modal_koszt_label: string;
   modal_koszt_nazwa: string;
+  modal_koszt_nazwa_invalid: boolean;
   modal_koszt_opis: string;
-  modal_koszt_wspolczynnik: string;
+  modal_koszt_elementy_przychodow_id: number;
   modal_koszt_on: boolean;
   modal_koszt_action: (/* name: string, opis: string, wspolczynnik: string*/) => void;
 };
 
 class Screen020 extends Component<Props, State> {
   state: State = {
-    callback: (index: number) => {},
     wniosek_id: 0,
     typ_id: 1,
+    koszty_rodzaje: [],
+    elementy_przychodow: [],
     wskaznik_id: 0,
     wskaznik_1: "1.0",
     wskaznik_2: "1.0",
     wskaznik_3: "1.0",
     modal_dialogs: ModalDialogsGetFake(),
-    koszty_rodzaje: [],
     modal_koszt_label: "",
     modal_koszt_nazwa: "",
+    modal_koszt_nazwa_invalid: false,
     modal_koszt_opis: "",
-    modal_koszt_wspolczynnik: "",
+    modal_koszt_elementy_przychodow_id: 0,
     modal_koszt_on: false,
     modal_koszt_action: (/*name: string, opis: string, wspolczynnik: string*/) => {},
   };
@@ -71,7 +67,6 @@ class Screen020 extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state.callback = props.callback;
     this.state.wniosek_id = props.wniosek_id;
     this.state.modal_dialogs = props.modal_dialogs;
   }
@@ -82,7 +77,6 @@ class Screen020 extends Component<Props, State> {
       () => {
         cancel();
         this.loadData();
-        this.loadSpreadsheet();
       }
     );
   }
@@ -97,7 +91,7 @@ class Screen020 extends Component<Props, State> {
         typ_id: this.state.typ_id,
         nazwa: this.state.modal_koszt_nazwa,
         opis: this.state.modal_koszt_opis,
-        wspolczynnik: this.state.modal_koszt_wspolczynnik,
+        elementy_przychodow_id: this.state.modal_koszt_elementy_przychodow_id,
       },
       (response) => {
         console.log("Axios.post/koszty_rodzaje/insert response:", response);
@@ -115,7 +109,7 @@ class Screen020 extends Component<Props, State> {
         id: this.koszt_last_edited_id,
         nazwa: this.state.modal_koszt_nazwa,
         opis: this.state.modal_koszt_opis,
-        wspolczynnik: this.state.modal_koszt_wspolczynnik,
+        elementy_przychodow_id: this.state.modal_koszt_elementy_przychodow_id,
       },
       (response) => {
         console.log(
@@ -259,11 +253,28 @@ class Screen020 extends Component<Props, State> {
     );
   };
 
+  loadElementPrzychodu = () => {
+    post(
+      "/alokacja_przychodow/select_elementy_przychodow",
+      {
+        typ_id: this.props.typ_id,
+      },
+      (response) => {
+        console.log("Screen020 loadElementPrzychodu response:", response);
+        this.setState({ elementy_przychodow: response.data }, () =>
+          console.log("Screen020 loadElementPrzychodu state:", this.state)
+        );
+      }
+    );
+  };
+
   loadData = () => {
     console.log("Screen020: loadData called");
     //this.loadDataSpreadsheet();
+    this.loadSpreadsheet();
     this.loadDataRodzaje();
     this.loadDataWskazniki();
+    this.loadElementPrzychodu();
   };
 
   componentDidMount() {
@@ -279,14 +290,15 @@ class Screen020 extends Component<Props, State> {
     label: string,
     nazwa: string,
     opis: string,
-    wspolczynnik: string,
+    elementy_przychodow_id: number,
     action: (/*name: string, opis: string, wspolczynnik: string*/) => void
   ) => {
     let new_state = {
       modal_koszt_label: label,
       modal_koszt_nazwa: nazwa,
+      modal_koszt_nazwa_invalid: false,
       modal_koszt_opis: opis,
-      modal_koszt_wspolczynnik: wspolczynnik,
+      modal_koszt_elementy_przychodow_id: elementy_przychodow_id,
       modal_koszt_on: true,
       modal_koszt_action: action,
     };
@@ -310,6 +322,11 @@ class Screen020 extends Component<Props, State> {
           {this.state.modal_koszt_label}
         </MDBModalHeader>
         <MDBModalBody>
+          {this.state.modal_koszt_nazwa_invalid ? (
+            <MDBBox className="_invalid">Niepoprawna wartość pola:</MDBBox>
+          ) : (
+            <></>
+          )}
           <MDBInput
             type="text"
             label="Nazwa:"
@@ -328,66 +345,28 @@ class Screen020 extends Component<Props, State> {
               this.setState({ modal_koszt_opis: value });
             }}
           ></MDBInput>
-
-          <MDBInputGroup
-            containerClassName="mb-3"
-            prepend="Współczynnik alokacji:"
-            inputs={
-              <select
-                className="browser-default custom-select"
-                onChange={(event) => {
-                  const { value } = event.currentTarget;
-                  this.setState({ modal_koszt_wspolczynnik: value });
-                }}
-              >
-                {this.state.modal_koszt_wspolczynnik === "A" ? (
-                  <option value="A" selected>
-                    A
-                  </option>
-                ) : (
-                  <option value="A">A</option>
-                )}
-                {this.state.modal_koszt_wspolczynnik === "B" ? (
-                  <option value="B" selected>
-                    B
-                  </option>
-                ) : (
-                  <option value="B">B</option>
-                )}
-                {this.state.modal_koszt_wspolczynnik === "C" ? (
-                  <option value="C" selected>
-                    C
-                  </option>
-                ) : (
-                  <option value="C">C</option>
-                )}
-                {this.state.modal_koszt_wspolczynnik === "D" ? (
-                  <option value="D" selected>
-                    D
-                  </option>
-                ) : (
-                  <option value="D">D</option>
-                )}
-                {this.state.modal_koszt_wspolczynnik === "E" ? (
-                  <option value="E" selected>
-                    E
-                  </option>
-                ) : (
-                  <option value="E">E</option>
-                )}
-              </select>
+          {ElementPrzychoduControl(
+            this.state.elementy_przychodow,
+            this.state.modal_koszt_elementy_przychodow_id,
+            (elementy_przychodow_id: number) => {
+              this.setState({modal_koszt_elementy_przychodow_id: elementy_przychodow_id});
             }
-          />
+          )}
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.modalRodzajKosztowOff}>
+          <MDBBtn color="mdb-color" onClick={this.modalRodzajKosztowOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
-            color="primary"
+            color="mdb-color"
             onClick={() => {
-              this.modalRodzajKosztowOff();
-              this.state.modal_koszt_action();
+              if (this.state.modal_koszt_nazwa === "") {
+                this.setState({ modal_koszt_nazwa_invalid: true });
+              } else {
+                this.setState({ modal_koszt_nazwa_invalid: false });
+                this.modalRodzajKosztowOff();
+                this.state.modal_koszt_action();
+              }
             }}
           >
             Akceptuj
@@ -399,26 +378,52 @@ class Screen020 extends Component<Props, State> {
 
   kosztyRodzaje = () => {
     return (
-      <MDBTable small>
+      <MDBTable className="_row bs-2">
         <MDBTableBody>
-          {this.state.koszty_rodzaje.map((koszt, index) => (
+          {this.state.koszty_rodzaje.map((koszt: KosztyRodzaje, index) => (
             <tr key={index}>
-              <td className="p-0">
+              <td className="p-0 w-100">
                 <MDBBox className="left p-0 font-weight-bold">
                   {koszt.nazwa}
                 </MDBBox>
                 <MDBBox className="left p-0">{koszt.opis}</MDBBox>
               </td>
-              <td className="p-0">
-                <MDBBtn
+              <td className="align-middle">
+                <div
+                  onClick={() => this.onRodzajeKosztowUsun(koszt.id)} //className="border rounded mb-0 pl-1"
+                  className="rounded flat_button pointer"
+                >
+                  <MDBIcon far icon="trash-alt p-1" />
+                </div>
+
+                {/* <MDBBtn
                   className="float-right p-2 m-1"
                   size="sm"
                   style={{ width: "60px" }}
                   onClick={() => this.onRodzajeKosztowUsun(koszt.id)}
                 >
                   Usuń
-                </MDBBtn>
-                <MDBBtn
+                </MDBBtn> */}
+              </td>
+              <td className="align-middle">
+                <div
+                  //className="border rounded mb-0 pl-1"
+                  className="rounded flat_button pointer"
+                  onClick={() => {
+                    this.koszt_last_edited_id = koszt.id;
+                    this.modalRodzajKosztowOn(
+                      "Edytuj typ kosztów",
+                      koszt.nazwa,
+                      koszt.opis,
+                      koszt.elementy_przychodow_id,
+                      this.onRodzajeKosztowEdytuj
+                    );
+                  }}
+                >
+                  <MDBIcon icon="pen p-1" />
+                </div>
+
+                {/* <MDBBtn
                   className="float-right p-2 m-1"
                   size="sm"
                   style={{ width: "60px" }}
@@ -446,7 +451,7 @@ class Screen020 extends Component<Props, State> {
                   }}
                 >
                   Edytuj
-                </MDBBtn>
+                </MDBBtn> */}
               </td>
             </tr>
           ))}
@@ -461,6 +466,8 @@ class Screen020 extends Component<Props, State> {
         {this.modalRodzajKosztow()}
         <MDBBtn
           size="sm"
+          color="mdb-color"
+          outline
           className="float-left"
           style={{ width: "250px" }}
           onClick={() =>
@@ -468,7 +475,7 @@ class Screen020 extends Component<Props, State> {
               "Dodaj nowy rodzaj kosztów",
               "",
               "",
-              "A",
+              0,
               this.onRodzajeKosztowDodaj
             )
           }
@@ -478,6 +485,8 @@ class Screen020 extends Component<Props, State> {
         {this.kosztyRodzaje()}
         <MDBBtn
           size="sm"
+          color="mdb-color"
+          outline
           className="float-left"
           style={{ width: "250px" }}
           onClick={this.insertRodzajeToSpreadsheet}
@@ -510,12 +519,12 @@ class Screen020 extends Component<Props, State> {
                   <MDBInput
                     noTag
                     className="text-right"
-                    type="text"
+                    type="number"
                     value={this.state.wskaznik_1}
                     onChange={(event) => {
-                      const { value } = event.currentTarget;
-                      //todo: validate value
-                      this.setState({ wskaznik_1: value });
+                      const value = event.currentTarget.value;
+                      if (Number(value) || value === "0")
+                        this.setState({ wskaznik_1: value });
                     }}
                   />
                 </MDBBox>
@@ -525,12 +534,12 @@ class Screen020 extends Component<Props, State> {
                   <MDBInput
                     noTag
                     className="text-right"
-                    type="text"
+                    type="number"
                     value={this.state.wskaznik_2}
                     onChange={(event) => {
-                      const { value } = event.currentTarget;
-                      //todo: validate value
-                      this.setState({ wskaznik_2: value });
+                      const value = event.currentTarget.value;
+                      if (Number(value) || value === "0")
+                        this.setState({ wskaznik_2: value });
                     }}
                   />
                 </MDBBox>
@@ -540,12 +549,12 @@ class Screen020 extends Component<Props, State> {
                   <MDBInput
                     noTag
                     className="text-right"
-                    type="text"
+                    type="number"
                     value={this.state.wskaznik_3}
                     onChange={(event) => {
-                      const { value } = event.currentTarget;
-                      //todo: validate value
-                      this.setState({ wskaznik_3: value });
+                      const value = event.currentTarget.value;
+                      if (Number(value) || value === "0")
+                        this.setState({ wskaznik_3: value });
                     }}
                   />
                 </MDBBox>
@@ -557,6 +566,8 @@ class Screen020 extends Component<Props, State> {
               <td style={{ padding: 2 }} colSpan={2}>
                 <MDBBtn
                   size="sm"
+                  color="mdb-color"
+                  outline
                   style={{ width: "250px" }}
                   className="float-right"
                   onClick={this.onPrognozuj}
@@ -583,6 +594,8 @@ class Screen020 extends Component<Props, State> {
               <td style={{ padding: 2 }} colSpan={2}>
                 <MDBBtn
                   size="sm"
+                  color="mdb-color"
+                  outline
                   style={{ width: "250px" }}
                   className="float-right"
                   onClick={this.onZapisz}
@@ -598,4 +611,4 @@ class Screen020 extends Component<Props, State> {
   }
 }
 
-export{Screen020 as Screen020_koszty}
+export { Screen020 as Screen020_koszty };

@@ -10,6 +10,7 @@ import { Screen010_zalozenia } from "./screen010_zalozenia";
 import { Screen020_koszty } from "./screen020_koszty";
 import { Screen040_popyt } from "./screen040_popyt";
 import { Screen050_grupy_odbiorcow } from "./screen050_grupy_odbiorcow";
+import { Screen060_alokacja_przychodow } from "./screen060_alokacja_przychodow";
 import Screen900 from "./screen900_";
 import { setPostToken, setPostModals } from "./post";
 import {
@@ -31,8 +32,19 @@ type State = {
   menu030: number;
 };
 
+let Menu020Items: string[] = [
+  "Założenia makroekonomiczne",
+  "Grupy odbiorców",
+  "Koszty",
+  "Kredyty i pożyczki",
+  "Popyt",
+  "Alokacja przychodów",
+  "Wyniki",
+];
+
 let Menu030Items: string[][] = [
   [],
+  ["Grupy Odbiorców - Woda", "Grupy Odbiorców - Ścieki"],
   [
     "Koszty - Woda",
     "Koszty - Ścieki",
@@ -42,7 +54,7 @@ let Menu030Items: string[][] = [
   ],
   [],
   ["Popyt - Woda", "Popyt - Ścieki"],
-  ["Grupy Odbiorców - Woda", "Grupy Odbiorców - Ścieki"],
+  ["Alokacja - Woda", "Alokacja - Ścieki"],
 ];
 
 export default class Main extends Component<Props, State> {
@@ -70,19 +82,14 @@ export default class Main extends Component<Props, State> {
 
   onChangeMenu020Zakladki = (value: any, name: string) => {
     console.log("onChangeMenu020 name: " + name + " value:" + value);
-    this.setState({ menu020: value, menu020_name: name }, () => {
+    this.setState({ menu020: value, menu020_name: name, menu030: 0}, () => {
       console.dir("onChangeMenu020 after state change");
       console.dir(this.state);
     });
   };
 
-  onChangeMenu030Podmenu(value: any) {
+  onChangeMenu030Podmenu = (value: any) =>{
     console.log("changeMenu030 " + value);
-    this.setState({ menu030: value }, () => console.dir(this.state));
-  }
-
-  onChangeScreen(value: any) {
-    console.log("onChangeScreen " + value);
     this.setState({ menu030: value }, () => console.dir(this.state));
   }
 
@@ -121,47 +128,70 @@ export default class Main extends Component<Props, State> {
               logout_callback={this.clearToken}
               modal_dialogs={this._modal_dialogs}
             />
-            <Menu020 callback={this.onChangeMenu020Zakladki} />
-            {Menu030Items[this.state.menu020] &&
-            Menu030Items[this.state.menu020].length > 0 ? (
-              <Menu030
-                callback={(value: any) => this.onChangeMenu030Podmenu(value)}
-                menu_items={Menu030Items[this.state.menu020]}
-              />
-            ) : (
-              <></>
-            )}
-            <MDBBox tag="h3" display="flex" m="3" className="left">
-              {this.state.menu020_name}
-            </MDBBox>
-            <MDBContainer>
-              {this.state.menu020 === 0 ? (
-                <Screen010_zalozenia wniosek_id={this.state.wniosek_id} />
-              ) : this.state.menu020 === 1 ? (
-                <Screen020_koszty
-                  wniosek_id={this.state.wniosek_id}
-                  typ_id={this.state.menu030 + 1}
-                  callback={(value: any) => this.onChangeScreen(value)}
-                  modal_dialogs={this._modal_dialogs}
-                />
-              ) : this.state.menu020 === 3 ? (
-                <Screen040_popyt
-                  wniosek_id={this.state.wniosek_id}
-                  typ_id={this.state.menu030 + 1}
-                  callback={(value: any) => this.onChangeScreen(value)}
-                  modal_dialogs={this._modal_dialogs}
-                />
-              ) : this.state.menu020 === 4 ? (
-                <Screen050_grupy_odbiorcow
-                  wniosek_id={this.state.wniosek_id}
-                  typ_id={this.state.menu030 + 1}
-                  callback={(value: any) => this.onChangeScreen(value)}
-                  modal_dialogs={this._modal_dialogs}
-                />
-              ) : (
-                <Screen900 nazwa={this.state.menu020_name} />
-              )}
-            </MDBContainer>
+            <table className="zero bs-1">
+              <tr>
+                <td>
+                  <Menu020 items={Menu020Items}  callback={this.onChangeMenu020Zakladki} />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  {Menu030Items[this.state.menu020] &&
+                  Menu030Items[this.state.menu020].length > 0 ? (
+                    <Menu030
+                      callback={this.onChangeMenu030Podmenu}
+                      menu_items={Menu030Items[this.state.menu020]}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <MDBBox tag="h3" display="flex" m="3" className="left">
+                    {this.state.menu020_name}
+                  </MDBBox>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <MDBContainer>
+                    {this.state.menu020 === 0 ? (
+                      <Screen010_zalozenia wniosek_id={this.state.wniosek_id} />
+                    ) : this.state.menu020 === 1 ? (
+                      <Screen050_grupy_odbiorcow
+                        wniosek_id={this.state.wniosek_id}
+                        typ_id={this.state.menu030 + 1}
+                        modal_dialogs={this._modal_dialogs}
+                      />
+                    ) : this.state.menu020 === 2 ? (
+                      <Screen020_koszty
+                        wniosek_id={this.state.wniosek_id}
+                        typ_id={this.state.menu030 + 1}
+                        modal_dialogs={this._modal_dialogs}
+                      />
+                    ) : //) : this.state.menu020 === 3 ? (
+                    //kredyty i pozyczki
+                    this.state.menu020 === 4 ? (
+                      <Screen040_popyt
+                        wniosek_id={this.state.wniosek_id}
+                        typ_id={this.state.menu030 + 1}
+                        modal_dialogs={this._modal_dialogs}
+                      />
+                    ) : this.state.menu020 === 5 ? (
+                      <Screen060_alokacja_przychodow
+                        wniosek_id={this.state.wniosek_id}
+                        typ_id={this.state.menu030 + 1}
+                        modal_dialogs={this._modal_dialogs}
+                      />
+                    ) : (
+                      <Screen900 nazwa={this.state.menu020_name} />
+                    )}
+                  </MDBContainer>
+                </td>
+              </tr>
+            </table>
           </>
         )}
       </>

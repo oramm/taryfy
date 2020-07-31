@@ -10,6 +10,9 @@ router.post("/select", (req, res) => {
 });
 
 router.post("/update", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   Zalozenia.Update(res, req);
 });
 

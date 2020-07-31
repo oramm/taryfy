@@ -2,11 +2,7 @@ import React, { Component } from "react";
 import update from "immutability-helper";
 import { post, cancel } from "./post";
 
-import {
-  GrupyOdbiorcow,
-  ElementSprzedazy,
-  WariantSymulacji,
-} from "../../../common/model";
+import { ElementSprzedazy, WariantSymulacji } from "../../../common/model";
 
 import {
   MDBModal,
@@ -17,9 +13,9 @@ import {
   MDBInput,
   MDBModalFooter,
   MDBBtn,
+  MDBBox,
 } from "mdbreact";
 import { OkresyControl } from "./modal_dialogs";
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 
 enum CalcChangeSource {
   sprzedaz_wartosc,
@@ -76,7 +72,6 @@ type Props = {
 
 type State = {
   typ_id: number;
-  //grupy_odbiorcow: GrupyOdbiorcow[];
   grupy: WariantSymulacjiGrupy[];
   grupy_wybrane: number[];
   sumy: WariantSymulacjiSumy[];
@@ -98,6 +93,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
     wariant: {
       id: 0,
       nazwa: "",
+      nazwa_invalid: false,
       opis: "",
     },
     wariant_okres_id: 1,
@@ -115,6 +111,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
         wariant: {
           id: 0,
           nazwa: "",
+          nazwa_invalid: false,
           opis: "",
         },
       });
@@ -500,7 +497,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
     if (!this.state.sumy || this.state.sumy.length === 0) return <></>;
     else
       return (
-        <MDBModal isOpen={true} className="modal-fluid">
+        <MDBModal isOpen={true} className="modal-fluid background">
           <MDBModalHeader>
             {this.props.wariant_symulacji_id === -1
               ? "Dodaj nowy wariant symulacji"
@@ -511,6 +508,13 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
               <MDBTableBody>
                 <tr>
                   <td>
+                    {this.state.wariant.nazwa_invalid ? (
+                      <MDBBox className="_invalid">
+                        Niepoprawna wartość pola:
+                      </MDBBox>
+                    ) : (
+                      <></>
+                    )}
                     <MDBInput
                       type="text"
                       label="Nazwa:"
@@ -550,7 +554,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                 </tr>
                 <tr>
                   <td>
-                    <MDBTable bordered>
+                    <MDBTable bordered className="wariant">
                       <MDBTableBody>
                         <tr>
                           <th></th>
@@ -567,38 +571,30 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                               noTag
                               className="text-right"
                               style={{ width: "100px" }}
-                              type="text"
+                              type="number"
                               value={
                                 this.state.sumy[this.state.suma_wybrana]
                                   .wskaznik
                               }
                               onChange={(event) => {
-                                const { value } = event.currentTarget;
-                                console.log("wg wskaźnika value:", value);
-                                this.setState(
-                                  (prevState) => {
-                                    console.log(
-                                      "wg wskaźnika before state:",
-                                      this.state
-                                    );
-                                    return update(prevState, {
-                                      sumy: {
-                                        [prevState.suma_wybrana]: {
-                                          wskaznik: { $set: Number(value) },
+                                const value = event.currentTarget.value;
+                                if (Number(value) || value === "0")
+                                  this.setState(
+                                    (prevState) => {
+                                      return update(prevState, {
+                                        sumy: {
+                                          [prevState.suma_wybrana]: {
+                                            wskaznik: { $set: Number(value) },
+                                          },
                                         },
-                                      },
-                                    });
-                                  },
-                                  () => {
-                                    console.log(
-                                      "wg wskaźnika after state:",
-                                      this.state
-                                    );
-                                    this.Calculate(
-                                      CalcChangeSource.abonament_wspolczynnik
-                                    );
-                                  }
-                                );
+                                      });
+                                    },
+                                    () => {
+                                      this.Calculate(
+                                        CalcChangeSource.abonament_wspolczynnik
+                                      );
+                                    }
+                                  );
                               }}
                             />
                           </th>
@@ -614,24 +610,27 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                 noTag
                                 className="text-right"
                                 style={{ width: "100px" }}
-                                type="text"
+                                type="number"
                                 value={this.state.grupy[item].sprzedaz}
                                 onChange={(event) => {
-                                  const { value } = event.currentTarget;
-                                  this.setState(
-                                    (prevState) =>
-                                      update(prevState, {
-                                        grupy: {
-                                          [item]: {
-                                            sprzedaz: { $set: Number(value) },
+                                  const value = event.currentTarget.value;
+                                  if (Number(value) || value === "0")
+                                    this.setState(
+                                      (prevState) => {
+                                        return update(prevState, {
+                                          grupy: {
+                                            [item]: {
+                                              sprzedaz: { $set: Number(value) },
+                                            },
                                           },
-                                        },
-                                      }),
-                                    () =>
-                                      this.Calculate(
-                                        CalcChangeSource.sprzedaz_wartosc
-                                      )
-                                  );
+                                        });
+                                      },
+                                      () => {
+                                        this.Calculate(
+                                          CalcChangeSource.sprzedaz_wartosc
+                                        );
+                                      }
+                                    );
                                 }}
                               />
                             </td>
@@ -640,29 +639,30 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                 noTag
                                 className="text-right"
                                 style={{ width: "100px" }}
-                                type="text"
+                                type="number"
                                 value={
                                   this.state.grupy[item]
                                     .sprzedaz_wspolczynnik_alokacji
                                 }
                                 onChange={(event) => {
-                                  const { value } = event.currentTarget;
-                                  this.setState(
-                                    (prevState) =>
-                                      update(prevState, {
-                                        grupy: {
-                                          [item]: {
-                                            sprzedaz_wspolczynnik_alokacji: {
-                                              $set: Number(value),
+                                  const value = event.currentTarget.value;
+                                  if (Number(value) || value === "0")
+                                    this.setState(
+                                      (prevState) =>
+                                        update(prevState, {
+                                          grupy: {
+                                            [item]: {
+                                              sprzedaz_wspolczynnik_alokacji: {
+                                                $set: Number(value),
+                                              },
                                             },
                                           },
-                                        },
-                                      }),
-                                    () =>
-                                      this.Calculate(
-                                        CalcChangeSource.sprzedaz_procent
-                                      )
-                                  );
+                                        }),
+                                      () =>
+                                        this.Calculate(
+                                          CalcChangeSource.sprzedaz_procent
+                                        )
+                                    );
                                 }}
                               />
                             </td>
@@ -673,28 +673,29 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                     noTag
                                     className="text-right"
                                     style={{ width: "100px" }}
-                                    type="text"
+                                    type="number"
                                     value={
                                       this.state.grupy[item].oplaty_abonament
                                     }
                                     onChange={(event) => {
                                       const { value } = event.currentTarget;
-                                      this.setState(
-                                        (prevState) =>
-                                          update(prevState, {
-                                            grupy: {
-                                              [item]: {
-                                                oplaty_abonament: {
-                                                  $set: Number(value),
+                                      if (Number(value) || value === "0")
+                                        this.setState(
+                                          (prevState) =>
+                                            update(prevState, {
+                                              grupy: {
+                                                [item]: {
+                                                  oplaty_abonament: {
+                                                    $set: Number(value),
+                                                  },
                                                 },
                                               },
-                                            },
-                                          }),
-                                        () =>
-                                          this.Calculate(
-                                            CalcChangeSource.abonament_wartosc
-                                          )
-                                      );
+                                            }),
+                                          () =>
+                                            this.Calculate(
+                                              CalcChangeSource.abonament_wartosc
+                                            )
+                                        );
                                     }}
                                   />
                                 </td>
@@ -703,34 +704,35 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                     noTag
                                     className="text-right"
                                     style={{ width: "100px" }}
-                                    type="text"
+                                    type="number"
                                     value={
                                       this.state.grupy[item]
                                         .oplaty_abonament_wspolczynnik_a
                                     }
                                     onChange={(event) => {
-                                      const { value } = event.currentTarget;
-                                      this.setState(
-                                        (prevState) =>
-                                          update(prevState, {
-                                            grupy: {
-                                              [item]: {
-                                                oplaty_abonament_wspolczynnik_a: {
-                                                  $set: Number(value),
+                                      const value = event.currentTarget.value;
+                                      if (Number(value) || value === "0")
+                                        this.setState(
+                                          (prevState) =>
+                                            update(prevState, {
+                                              grupy: {
+                                                [item]: {
+                                                  oplaty_abonament_wspolczynnik_a: {
+                                                    $set: Number(value),
+                                                  },
                                                 },
                                               },
-                                            },
-                                          }),
-                                        () => {
-                                          console.log(
-                                            "onChange abonament_wspolczynnik state:",
-                                            this.state
-                                          );
-                                          this.Calculate(
-                                            CalcChangeSource.abonament_procent
-                                          );
-                                        }
-                                      );
+                                            }),
+                                          () => {
+                                            console.log(
+                                              "onChange abonament_wspolczynnik state:",
+                                              this.state
+                                            );
+                                            this.Calculate(
+                                              CalcChangeSource.abonament_procent
+                                            );
+                                          }
+                                        );
                                     }}
                                   />
                                 </td>
@@ -933,14 +935,14 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                         </tr>
                         <tr>
                           <th>Różnica</th>
-                          <td>
+                          <td className="text-right">
                             {
                               this.state.sumy[this.state.suma_wybrana]
                                 .sprzedaz_roznica
                             }
                           </td>
                           <td></td>
-                          <td>
+                          <td className="text-right">
                             {
                               this.state.sumy[this.state.suma_wybrana]
                                 .oplaty_abonament_roznica
@@ -985,18 +987,32 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           </MDBModalBody>
           <MDBModalFooter>
             <MDBBtn
-              color="secondary"
+              color="mdb-color"
               onClick={() => this.props.callback(false)}
             >
               Anuluj
             </MDBBtn>
             <MDBBtn
-              color="primary"
+              color="mdb-color"
               onClick={() => {
-                this.props.wariant_symulacji_id === -1
-                  ? this.dodaj()
-                  : this.edytuj();
-                this.props.callback(true);
+                if (this.state.wariant.nazwa === "") {
+                  this.setState((prevState) => {
+                    return update(prevState, {
+                      wariant: { nazwa_invalid: { $set: true } },
+                    });
+                  });
+                } else {
+                  this.setState((prevState) => {
+                    return update(prevState, {
+                      wariant: { nazwa_invalid: { $set: false } },
+                    });
+                  });
+
+                  this.props.wariant_symulacji_id === -1
+                    ? this.dodaj()
+                    : this.edytuj();
+                  this.props.callback(true);
+                }
               }}
             >
               Akceptuj

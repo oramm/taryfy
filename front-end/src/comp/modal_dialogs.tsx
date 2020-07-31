@@ -11,6 +11,8 @@ import {
   MDBBtnGroup,
   MDBBox,
 } from "mdbreact";
+import { ElementPrzychodu } from "../../../common/model";
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "constants";
 
 export type ModalDialogs = {
   nazwaOn: (
@@ -33,6 +35,9 @@ export type ModalDialogs = {
   errorOn: (label: string) => void;
   wTokuOn: () => void;
   wTokuOff: () => void;
+  hasloOn: (
+    callback: (haslo: string, haslo1: string, haslo2: string) => void
+  ) => void;
 };
 
 type Props = {
@@ -42,6 +47,7 @@ type Props = {
 type State = {
   modal_label: string;
   modal_nazwa: string;
+  modal_nazwa_invalid: boolean;
   modal_opis: string;
   modal_opis_on: boolean;
   modal_opis_id: number;
@@ -52,6 +58,11 @@ type State = {
   //  modal_w_toku_count: number;
   modal_w_toku_on: boolean;
   modal_error_on: boolean;
+  modal_haslo_on: boolean;
+  modal_haslo: string;
+  modal_haslo1: string;
+  modal_haslo_invalid: boolean;
+  modal_haslo2: string;
 };
 
 // type OnModal = (
@@ -61,7 +72,11 @@ type State = {
 // ) => void;
 
 let GrupyAllokacji = ["A", "B", "C", "D", "E", "F"];
-let GrupyAllokacjiControl = (sel: any, label: string, callback: (value: any) => void) => {
+let GrupyAllokacjiControl = (
+  sel: any,
+  label: string,
+  callback: (value: any) => void
+) => {
   return (
     <MDBInputGroup
       containerClassName="mb-3"
@@ -91,16 +106,20 @@ let GrupyAllokacjiControl = (sel: any, label: string, callback: (value: any) => 
 };
 
 let Okresy = ["1-12", "13-24", "25-36"];
-let OkresyControl = (callback: (index: number, value: string)=>void, selected_item: number) =>
-{
+let OkresyControl = (
+  callback: (index: number, value: string) => void,
+  selected_item: number
+) => {
   return (
     <MDBBtnGroup>
       {Okresy.map((name, index) => (
         <MDBBox key={index}>
           <MDBBtn
-            onClick={() => callback(index,name)}
+            onClick={() => callback(index, name)}
             size="sm"
-            active={selected_item === index+1}
+            color="mdb-color"
+            outline
+            active={selected_item === index + 1}
           >
             {name}
           </MDBBtn>
@@ -108,13 +127,14 @@ let OkresyControl = (callback: (index: number, value: string)=>void, selected_it
       ))}
     </MDBBtnGroup>
   );
-}
+};
 
 class ModalDialogsComp extends Component<Props, State> {
   state: State = {
     modal_label: "",
     modal_nazwa: "",
     modal_nazwa_on: false,
+    modal_nazwa_invalid: false,
     modal_opis: "",
     modal_opis_on: false,
     modal_opis_id: 0,
@@ -123,6 +143,11 @@ class ModalDialogsComp extends Component<Props, State> {
     modal_usun_disabled: true,
     modal_w_toku_on: false,
     modal_error_on: false,
+    modal_haslo_on: false,
+    modal_haslo: "",
+    modal_haslo1: "",
+    modal_haslo_invalid: false,
+    modal_haslo2: "",
   };
   private modal_w_toku_count: number = 0;
 
@@ -135,6 +160,7 @@ class ModalDialogsComp extends Component<Props, State> {
       errorOn: this.errorOn,
       wTokuOn: this.wTokuOn,
       wTokuOff: this.wTokuOff,
+      hasloOn: this.hasloOn,
     };
     props.set_modal_dialog_callbacks(dialogs);
   }
@@ -150,6 +176,7 @@ class ModalDialogsComp extends Component<Props, State> {
       modal_label: label,
       modal_nazwa: nazwa,
       modal_nazwa_on: true,
+      modal_nazwa_invalid: false,
       modal_callback: action,
     });
   };
@@ -173,6 +200,7 @@ class ModalDialogsComp extends Component<Props, State> {
     this.setState({
       modal_label: label,
       modal_nazwa: nazwa,
+      modal_nazwa_invalid: false,
       modal_opis: opis,
       modal_opis_on: true,
       modal_opis_id: id,
@@ -183,6 +211,19 @@ class ModalDialogsComp extends Component<Props, State> {
   opisOff = () => {
     this.setState({
       modal_opis_on: false,
+    });
+  };
+
+  hasloOn = () => {
+    this.setState({
+      modal_haslo_on: true,
+      modal_haslo_invalid: false,
+    });
+  };
+
+  hasloOff = () => {
+    this.setState({
+      modal_haslo_on: false,
     });
   };
 
@@ -254,10 +295,16 @@ class ModalDialogsComp extends Component<Props, State> {
           {this.state.modal_label}
         </MDBModalHeader>
         <MDBModalBody>
+          {this.state.modal_nazwa_invalid ? (
+            <MDBBox className="_invalid">Niepoprawna wartość pola:</MDBBox>
+          ) : (
+            <></>
+          )}
           <MDBInput
             type="text"
             label="Podaj nazwę"
             value={this.state.modal_nazwa}
+            className="_invalid"
             onChange={(event) => {
               const { value } = event.currentTarget;
               this.setState({ modal_nazwa: value });
@@ -265,14 +312,19 @@ class ModalDialogsComp extends Component<Props, State> {
           ></MDBInput>{" "}
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.nazwaOff}>
+          <MDBBtn color="mdb-color" onClick={this.nazwaOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
-            color="primary"
+            color="mdb-color"
             onClick={() => {
-              this.nazwaOff();
-              this.state.modal_callback(this.state.modal_nazwa);
+              if (this.state.modal_nazwa === "") {
+                this.setState({ modal_nazwa_invalid: true });
+              } else {
+                this.setState({ modal_nazwa_invalid: false });
+                this.nazwaOff();
+                this.state.modal_callback(this.state.modal_nazwa);
+              }
             }}
           >
             Akceptuj
@@ -289,6 +341,11 @@ class ModalDialogsComp extends Component<Props, State> {
           {this.state.modal_label}
         </MDBModalHeader>
         <MDBModalBody>
+          {this.state.modal_nazwa_invalid ? (
+            <MDBBox className="_invalid">Niepoprawna wartość pola:</MDBBox>
+          ) : (
+            <></>
+          )}
           <MDBInput
             type="text"
             label="Nazwa:"
@@ -309,14 +366,23 @@ class ModalDialogsComp extends Component<Props, State> {
           ></MDBInput>
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.opisOff}>
+          <MDBBtn color="mdb-color" onClick={this.opisOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
-            color="primary"
+            color="mdb-color"
             onClick={() => {
-              this.opisOff();
-              this.state.modal_callback(this.state.modal_nazwa, this.state.modal_opis, this.state.modal_opis_id);
+              if (this.state.modal_nazwa === "") {
+                this.setState({ modal_nazwa_invalid: true });
+              } else {
+                this.setState({ modal_nazwa_invalid: false });
+                this.opisOff();
+                this.state.modal_callback(
+                  this.state.modal_nazwa,
+                  this.state.modal_opis,
+                  this.state.modal_opis_id
+                );
+              }
             }}
           >
             Akceptuj
@@ -346,11 +412,11 @@ class ModalDialogsComp extends Component<Props, State> {
           </div>
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.usunOff}>
+          <MDBBtn color="mdb-color" onClick={this.usunOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
-            color="primary"
+            color="mdb-color"
             onClick={() => {
               this.usunOff();
               this.state.modal_callback(this.state.modal_nazwa);
@@ -384,8 +450,74 @@ class ModalDialogsComp extends Component<Props, State> {
         <MDBModalHeader toggle={this.errorOff}>Błąd:</MDBModalHeader>
         <MDBModalBody>{this.state.modal_label}</MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.errorOff}>
+          <MDBBtn color="mdb-color" onClick={this.errorOff}>
             Zamknij
+          </MDBBtn>
+        </MDBModalFooter>
+      </MDBModal>
+    );
+  }
+
+  modalHaslo() {
+    return (
+      <MDBModal isOpen={this.state.modal_haslo_on} toggle={this.hasloOff}>
+        <MDBModalHeader toggle={this.hasloOff}>Zmiana hasła</MDBModalHeader>
+        <MDBModalBody>
+          <MDBInput
+            type="password"
+            label="Aktualne hasło:"
+            value={this.state.modal_haslo}
+            onChange={(event) => {
+              const { value } = event.currentTarget;
+              this.setState({ modal_haslo: value });
+            }}
+          ></MDBInput>
+          {this.state.modal_haslo_invalid ? (
+            <MDBBox className="_invalid">
+              Niepoprawna wartość, podane hasła są różne:
+            </MDBBox>
+          ) : (
+            <></>
+          )}
+          <MDBInput
+            type="password"
+            label="Nowe hasło:"
+            value={this.state.modal_haslo1}
+            onChange={(event) => {
+              const { value } = event.currentTarget;
+              this.setState({ modal_haslo1: value });
+            }}
+          ></MDBInput>
+          <MDBInput
+            type="password"
+            label="Powtórz nowe hasło:"
+            value={this.state.modal_haslo2}
+            onChange={(event) => {
+              const { value } = event.currentTarget;
+              this.setState({ modal_haslo2: value });
+            }}
+          ></MDBInput>
+        </MDBModalBody>
+        <MDBModalFooter>
+          <MDBBtn color="mdb-color" onClick={this.hasloOff}>
+            Anuluj
+          </MDBBtn>
+          <MDBBtn
+            color="mdb-color"
+            onClick={() => {
+              if (this.state.modal_haslo2 !== this.state.modal_haslo1) {
+                this.setState({ modal_haslo_invalid: true });
+              } else {
+                this.hasloOff();
+                this.state.modal_callback(
+                  this.state.modal_haslo,
+                  this.state.modal_haslo1,
+                  this.state.modal_haslo2
+                );
+              }
+            }}
+          >
+            Akceptuj
           </MDBBtn>
         </MDBModalFooter>
       </MDBModal>
@@ -400,6 +532,7 @@ class ModalDialogsComp extends Component<Props, State> {
         {this.modalUsun()}
         {this.modalWToku()}
         {this.modalError()}
+        {this.modalHaslo()}
       </>
     );
   }
@@ -409,7 +542,12 @@ const ModalDialogsGetFake: () => ModalDialogs = () => ({
   nazwaOn: (label: string, nazwa: string, action: (name: string) => void) => {
     console.log("ModalDialogsFake nazwaOn error!");
   },
-  opisOn: (label: string, nazwa: string, opis: string, action: (name: string, opis: string) => void) => {
+  opisOn: (
+    label: string,
+    nazwa: string,
+    opis: string,
+    action: (name: string, opis: string) => void
+  ) => {
     console.log("ModalDialogsFake nazwaOn error!");
   },
   usunOn: (label: string, nazwa: string, action: (name: string) => void) => {
@@ -424,6 +562,53 @@ const ModalDialogsGetFake: () => ModalDialogs = () => ({
   wTokuOff: () => {
     console.log("ModalDialogsFake wTokuOff error!");
   },
+  hasloOn: () => {
+    console.log("ModalDialogsFake wTokuOff error!");
+  },
 });
 
-export { ModalDialogsGetFake, ModalDialogsComp, GrupyAllokacjiControl, OkresyControl };
+let ElementPrzychoduControl = (
+  elementy_przychodow: ElementPrzychodu[],
+  elementy_przychodow_selected_id: number,
+  callback: (elementy_przychodow_id: number) => void
+) => {
+  let selected = 0;
+  return (
+    <MDBInputGroup
+      containerClassName="mb-3"
+      prepend="Współczynnik alokacji:"
+      inputs={
+        <select
+          className="browser-default custom-select"
+
+          onChange={(event) => {
+            const { value } = event.currentTarget;
+            let num_value: number = Number(value);
+            console.log("ElementPrzychoduControl num_value:", num_value);
+            callback(num_value);
+          }}
+        >
+          {elementy_przychodow.map((item: ElementPrzychodu, index: number) => {
+            if (selected === 0 && item.poziom === 2) selected = item.id;
+            return (
+              item.poziom === 2 ? <option
+                value={item.id}
+                selected={item.id === elementy_przychodow_selected_id}
+              >
+                {item.nazwa}
+              </option> : <></>
+            );
+          })}
+        </select>
+      }{...selected && !elementy_przychodow_selected_id && callback(selected)}
+    /> 
+  );
+};
+
+export {
+  ModalDialogsGetFake,
+  ModalDialogsComp,
+  GrupyAllokacjiControl,
+  OkresyControl,
+  ElementPrzychoduControl,
+};

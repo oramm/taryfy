@@ -16,16 +16,17 @@ import { PopytElementSprzedazyRouter } from "./src/popyt_element_sprzedazy";
 import { PopytWariantySymulacjiRouter } from "./src/popyt_warianty_symulacji";
 //import { PopytWariantOdbiorcyRouter } from "./src/popyt_wariant_odbiorcy";
 import { PopytZestawienieRouter } from "./src/popyt_zestawienie";
+import { AlokacjaPrzychodowRouter } from "./src/alokacja_przychodow";
 import { GrupyOdbiorcowRouter } from "./src/grupy_odbiorcow";
 import { Log } from "./src/log";
 import { KosztySpreadsheet } from "./src/koszty_spreadsheet";
 
-
 app.use(express.static("public"));
-app.use(bodyParser.json()); // to support JSON-encoded bodies
+//support JSON-encoded bodies
+app.use(bodyParser.json());
+//support URL-encoded bodies
 app.use(
   bodyParser.urlencoded({
-    // to support URL-encoded bodies
     extended: true,
   })
 );
@@ -90,12 +91,12 @@ app.use("/koszty_rodzaje", KosztyRodzajeRouter);
 app.use("/koszty_wskazniki", KosztyWskaznikiRouter);
 app.use("/koszty_spreadsheet", KosztySpreadsheetRouter);
 app.use("/koszty", KosztyRouter);
-app.use("/popyt_element_sprzedazy",  PopytElementSprzedazyRouter);
-app.use("/popyt_warianty_symulacji",  PopytWariantySymulacjiRouter);
+app.use("/popyt_element_sprzedazy", PopytElementSprzedazyRouter);
+app.use("/popyt_warianty_symulacji", PopytWariantySymulacjiRouter);
 //app.use("/popyt_wariant_odbiorcy",  PopytWariantOdbiorcyRouter);
-app.use("/popyt_zestawienie",  PopytZestawienieRouter);
-app.use("/grupy_odbiorcow",  GrupyOdbiorcowRouter);
-
+app.use("/popyt_zestawienie", PopytZestawienieRouter);
+app.use("/alokacja_przychodow", AlokacjaPrzychodowRouter);
+app.use("/grupy_odbiorcow", GrupyOdbiorcowRouter);
 
 //todo: return some error?
 app.use((req, res, next) => {

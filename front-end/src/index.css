@@ -14,7 +14,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #e0f2f1;
+}
+
+div#root {
+  background-color: #dfe3ec;
+}
+.background {
+  background-color: #dfe3ec;
 }
 
 code {
@@ -30,6 +36,120 @@ div.selected {
   background-color: #b2dfdb;
 }
 
-div.selectable {
+.pointer {
   cursor: pointer;
 }
+
+.incorrect {
+  color: #a00000;
+}
+
+/* remove arrows from numeric input fields */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+._invalid
+{
+ color: #a00000; 
+}
+
+table.wariant,
+table.wariant th,
+table.wariant th td,
+table.wariant tr td {
+  padding: 0;
+  background-color: #d3d9e4;
+  border-collapse: separate;
+  border-spacing: 1px;
+}
+table.zero tr td {
+  border: 0px solid black;
+  padding: 0px;
+  margin: 0px;
+}
+
+table.bs-1 {
+  border-collapse: separate;
+  border-spacing: 1px;
+}
+table.bs-2 {
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+table.bs-3 {
+  border-collapse: separate;
+  border-spacing: 3px;
+}
+
+.flat_button {
+  background-color: #cfd5e2;
+}
+
+.table_row_selected {
+  background-color: #cfd5e2;
+}
+
+.table_even_row {
+  background-color: #cfd5e2;
+}
+
+table._border {
+  border: 1px solid #d3d9e4;
+}
+
+table._lines tr td,
+table._lines th td,
+table._lines th {
+  /* border: 1px solid #eff2f5;
+  border-collapse: collapse; */
+  background-color: #d3d9e4;
+}
+table._zestawienie tr td {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+/*
+eff2f5 - jasniejszy
+dfe3ec - tlo
+d3d9e4 - ciemniejszy
+*/
+
+table._row tr td {
+  border-top: 1px solid #d3d9e4;
+  /* border-collapse: collapse; */
+  /* background-color: #d3d9e4; */
+  padding: 0px;
+  margin: 0px;
+}
+
+.navbar-background {
+  background-color: #8290b0;
+}
+.navbar-button {
+  background-color: #467ab9;
+}
+/*
+vertical-align: middle;
+
+backgroud #b5cae3
+
+navbar background #90afd5
+body 
+
+data
+
+button #7ea2ce
+
+table
+header
+row
+border
+*/

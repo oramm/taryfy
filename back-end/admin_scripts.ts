@@ -3,6 +3,7 @@ import { klienciInsert } from "./src/klienci";
 
 let add_user = async (data: {
   nazwa: string;
+  uprawnienia: string;
   haslo: string;
   klient_nazwa: string;
 }) => {
@@ -11,7 +12,7 @@ let add_user = async (data: {
 
 let add_client = async (
   klient: { nazwa: string; opis: string; adres: string; nip: string },
-  users?: { nazwa: string; haslo: string }[]
+  users?: { nazwa: string; uprawnienia: string; haslo: string }[]
 ) => {
   let ret = await klienciInsert(klient);
   if (users) {
@@ -19,6 +20,7 @@ let add_client = async (
       ret = await add_user({
         klient_nazwa: klient.nazwa,
         nazwa: users[i].nazwa,
+        uprawnienia: users[i].uprawnienia,
         haslo: users[i].haslo,
       });
     }

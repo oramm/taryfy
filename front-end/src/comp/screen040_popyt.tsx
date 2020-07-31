@@ -13,6 +13,7 @@ import {
   MDBInputGroup,
   MDBContainer,
   MDBTableHead,
+  MDBIcon,
 } from "mdbreact";
 import { post, cancel } from "./post";
 import ModalWariantSymulacji from "./screen040_popyt_wariant";
@@ -27,14 +28,12 @@ import {
 import { REPLServer } from "repl";
 
 type Props = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
   modal_dialogs: ModalDialogs;
 };
 
 type State = {
-  callback: (index: number) => void;
   wniosek_id: number;
   typ_id: number;
   elementy_sprzedazy: ElementSprzedazy[];
@@ -60,7 +59,6 @@ type State = {
 
 export default class Screen extends Component<Props, State> {
   state: State = {
-    callback: (index: number) => {},
     wniosek_id: 0,
     typ_id: 1,
     modal_dialogs: ModalDialogsGetFake(),
@@ -78,6 +76,7 @@ export default class Screen extends Component<Props, State> {
       wniosek_id: 0,
       typ_id: 0,
       nazwa: "",
+      nazwa_invalid: false,
       opis: "",
       wspolczynnik: "",
       jednostka: "",
@@ -98,7 +97,6 @@ export default class Screen extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state.callback = props.callback;
     this.state.wniosek_id = props.wniosek_id;
     this.state.modal_dialogs = props.modal_dialogs;
   }
@@ -304,6 +302,7 @@ export default class Screen extends Component<Props, State> {
       {
         wniosek_id: this.state.wniosek_id,
         okres_id: this.state.okres_id,
+        typ_id: this.state.typ_id,
       },
       (response) => {
         console.log("loadDataZestawienie response:", response);
@@ -364,6 +363,11 @@ export default class Screen extends Component<Props, State> {
           {this.state.modal_sprzedaz_label}
         </MDBModalHeader>
         <MDBModalBody>
+          {this.state.modal_sprzedaz.nazwa_invalid ? (
+            <MDBBox className="_invalid">Niepoprawna wartość pola:</MDBBox>
+          ) : (
+            <></>
+          )}
           <MDBInput
             type="text"
             label="Nazwa:"
@@ -512,14 +516,27 @@ export default class Screen extends Component<Props, State> {
           </MDBContainer>
         </MDBModalBody>
         <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={this.modalElementSprzedarzyOff}>
+          <MDBBtn color="mdb-color" onClick={this.modalElementSprzedarzyOff}>
             Anuluj
           </MDBBtn>
           <MDBBtn
-            color="primary"
+            color="mdb-color"
             onClick={() => {
-              this.modalElementSprzedarzyOff();
-              this.state.modal_sprzedaz_callback(this.state.modal_sprzedaz);
+              if (this.state.modal_sprzedaz.nazwa === "") {
+                this.setState((prevState) => {
+                  return update(prevState, {
+                    modal_sprzedaz: { nazwa_invalid: { $set: true } },
+                  });
+                });
+              } else {
+                this.setState((prevState) => {
+                  return update(prevState, {
+                    modal_sprzedaz: { nazwa_invalid: { $set: false } },
+                  });
+                });
+                this.modalElementSprzedarzyOff();
+                this.state.modal_sprzedaz_callback(this.state.modal_sprzedaz);
+              }
             }}
           >
             Akceptuj
@@ -532,34 +549,44 @@ export default class Screen extends Component<Props, State> {
   elementySprzedazy = () => {
     return (
       <>
-        <MDBBtn
-          size="sm"
-          className="float-left"
-          style={{ width: "250px" }}
-          onClick={() =>
-            this.modalElementSprzedarzyOn(
-              "Dodaj nowy element sprzedaży",
-              {
-                id: 0,
-                wniosek_id: 0,
-                typ_id: 0,
-                nazwa: "",
-                opis: "",
-                wspolczynnik: "",
-                jednostka: "",
-                abonament: false,
-                abonament_nazwa: "",
-                abonament_wspolczynnik: "",
-                wariant_id: 0,
-              },
-              this.onElementSprzedazyDodaj
-            )
-          }
-        >
-          Dodaj nowy element sprzedaży
-        </MDBBtn>
-        <MDBTable className="m-0">
+        <MDBTable className="_row m-0 bs-3">
           <MDBTableBody>
+            <tr>
+              <td colSpan={3}>
+                <div className="d-flex justify-content-between">
+                  <MDBBox tag="h5">Elementy sprzedaży</MDBBox>
+                  <MDBBtn
+                    size="sm"
+                    style={{ width: "250px" }}
+                    color="mdb-color"
+                    outline
+                    className="float-right"
+                    onClick={() =>
+                      this.modalElementSprzedarzyOn(
+                        "Dodaj nowy element sprzedaży",
+                        {
+                          id: 0,
+                          wniosek_id: 0,
+                          typ_id: 0,
+                          nazwa: "",
+                          nazwa_invalid: false,
+                          opis: "",
+                          wspolczynnik: "",
+                          jednostka: "",
+                          abonament: false,
+                          abonament_nazwa: "",
+                          abonament_wspolczynnik: "",
+                          wariant_id: 0,
+                        },
+                        this.onElementSprzedazyDodaj
+                      )
+                    }
+                  >
+                    Dodaj nowy element sprzedaży
+                  </MDBBtn>
+                </div>
+              </td>
+            </tr>
             {this.state.elementy_sprzedazy.map((item, index) => (
               <tr
                 color="teal lighten-1"
@@ -581,7 +608,7 @@ export default class Screen extends Component<Props, State> {
                 }
               >
                 <td
-                  className="p-0 w-100"
+                  className="w-100"
                   // className={
                   //   this.state.elementy_sprzedazy_selected === index
                   //     ? "p-0 selected"
@@ -593,8 +620,8 @@ export default class Screen extends Component<Props, State> {
                     //className="border rounded mb-0 pl-1"
                     className={
                       this.state.elementy_sprzedazy_selected === index
-                        ? "rounded pl-1 selected"
-                        : "p-0 selectable"
+                        ? "rounded pl-1 table_row_selected"
+                        : "p-0 pointer"
                     }
                   >
                     <MDBBox className="left p-0 pl-1 font-weight-bold">
@@ -603,18 +630,42 @@ export default class Screen extends Component<Props, State> {
                     <MDBBox className="left p-0 pl-1">{item.opis}</MDBBox>
                   </div>
                 </td>
-                <td className="p-0">
-                  <MDBBtn
+                <td className="align-middle">
+                  <div
+                    onClick={() => this.onElementSprzedazyUsun(item.id)}
+                    //className="border rounded mb-0 pl-1"
+                    className="rounded flat_button pointer"
+                  >
+                    <MDBIcon far icon="trash-alt p-1" />
+                  </div>
+                  {/* <MDBBtn
+                    flat
                     className="float-right p-2 m-1"
                     size="sm"
                     style={{ width: "60px" }}
                     onClick={() => this.onElementSprzedazyUsun(item.id)}
                   >
+                    <MDBIcon far icon="trash-alt" />
                     Usuń
-                  </MDBBtn>
+                  </MDBBtn> */}
                 </td>
-                <td className="p-0">
-                  <MDBBtn
+                <td className="align-middle">
+                  <div
+                    //className="border rounded mb-0 pl-1"
+                    className="rounded flat_button pointer"
+                    onClick={() => {
+                      this.modalElementSprzedarzyOn(
+                        "Edytuj typ kosztów",
+                        item,
+                        this.onElementSprzedazyEdytuj
+                      );
+                    }}
+                  >
+                    <MDBIcon icon="pen p-1" />
+                  </div>
+
+                  {/* <MDBIcon icon="pen" /> */}
+                  {/* <MDBBtn
                     className="float-right p-2 m-1"
                     size="sm"
                     style={{ width: "60px" }}
@@ -626,8 +677,9 @@ export default class Screen extends Component<Props, State> {
                       );
                     }}
                   >
+                    <MDBIcon icon="pen" />
                     Edytuj
-                  </MDBBtn>
+                  </MDBBtn> */}
                 </td>
               </tr>
             ))}
@@ -722,24 +774,51 @@ export default class Screen extends Component<Props, State> {
           ) : (
             <> </>
           )}
-          <MDBBtn
-            size="sm"
-            className="float-left"
-            style={{ width: "250px" }}
-            onClick={() =>
-              this.modalWariantSymulacjiOn(
-                true,
-                this.modalWariantSymulacjiOff,
-                -1
-              )
-            }
-          >
-            Dodaj nowy wariant symulacji
-          </MDBBtn>
-          {this.state.warianty_symulacji.length > 0 ? (
-            <MDBTable className="m-0">
-              <MDBTableBody>
-                {this.state.warianty_symulacji.map((item, index) => (
+          <MDBTable className="_row bs-3">
+            <MDBTableBody>
+              <tr>
+                <td colSpan={3}>
+                  <div className="d-flex justify-content-between">
+                    <MDBBox tag="h5">Warianty symulacji</MDBBox>
+                    <MDBBtn
+                      size="sm"
+                      style={{ width: "250px" }}
+                      color="mdb-color"
+                      outline
+                      className="float-right"
+                      onClick={() =>
+                        this.modalWariantSymulacjiOn(
+                          true,
+                          this.modalWariantSymulacjiOff,
+                          -1
+                        )
+                      }
+                    >
+                      {/* <MDBBox className="left p-1 align-middle"> */}
+                      Dodaj nowy wariant symulacji
+                      {/* </MDBBox> */}
+                    </MDBBtn>
+
+                    {/* <div
+                      //className="border rounded mb-0 pl-1"
+                      className="rounded pl-0 flat_button pointer"
+                      onClick={() =>
+                        this.modalWariantSymulacjiOn(
+                          true,
+                          this.modalWariantSymulacjiOff,
+                          -1
+                        )
+                      }
+                    >
+                      <MDBBox className="left p-1 align-middle">
+                        Dodaj nowy wariant symulacji
+                      </MDBBox>
+                    </div> */}
+                  </div>
+                </td>
+              </tr>
+              {this.state.warianty_symulacji.length > 0 ? (
+                this.state.warianty_symulacji.map((item, index) => (
                   <tr key={index}>
                     {/* <td
                       onClick={(event) =>
@@ -759,8 +838,9 @@ export default class Screen extends Component<Props, State> {
                         id="radioWarianty"
                       />
                     </td> */}
+
                     <td
-                      className="p-0 w-100"
+                      className="w-100"
                       onClick={(event) =>
                         this.state.elementy_sprzedazy[
                           this.state.elementy_sprzedazy_selected
@@ -774,8 +854,8 @@ export default class Screen extends Component<Props, State> {
                           this.state.elementy_sprzedazy[
                             this.state.elementy_sprzedazy_selected
                           ].wariant_id === item.id
-                            ? "rounded pl-1 selected"
-                            : "p-0 selectable"
+                            ? "rounded pl-1 table_row_selected"
+                            : "p-0 pointer"
                         }
                       >
                         <MDBBox className="left p-0 font-weight-bold pl-1">
@@ -784,18 +864,17 @@ export default class Screen extends Component<Props, State> {
                         <MDBBox className="left p-0 pl-1">{item.opis}</MDBBox>
                       </div>
                     </td>
-                    <td className="p-0">
-                      <MDBBtn
-                        className="float-right p-2 m-1"
-                        size="sm"
-                        style={{ width: "60px" }}
+                    <td className="align-middle">
+                      <div
                         onClick={() => this.onWariantSymulacjiUsun(item.id)}
+                        //className="border rounded mb-0 pl-1"
+                        className="rounded flat_button pointer"
                       >
-                        Usuń
-                      </MDBBtn>
+                        <MDBIcon far icon="trash-alt p-1" />
+                      </div>
                     </td>
-                    <td className="p-0">
-                      <MDBBtn
+                    <td className="align-middle">
+                      {/* <MDBBtn
                         className="float-right p-2 m-1"
                         size="sm"
                         style={{ width: "60px" }}
@@ -808,15 +887,28 @@ export default class Screen extends Component<Props, State> {
                         }}
                       >
                         Edytuj
-                      </MDBBtn>
+                      </MDBBtn> */}
+                      <div
+                        //className="border rounded mb-0 pl-1"
+                        className="rounded flat_button pointer"
+                        onClick={() => {
+                          this.modalWariantSymulacjiOn(
+                            false,
+                            this.modalWariantSymulacjiOff,
+                            item.id
+                          );
+                        }}
+                      >
+                        <MDBIcon icon="pen p-1" />
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </MDBTableBody>
-            </MDBTable>
-          ) : (
-            <></>
-          )}
+                ))
+              ) : (
+                <></>
+              )}
+            </MDBTableBody>
+          </MDBTable>
         </>
       );
   };
@@ -874,10 +966,6 @@ export default class Screen extends Component<Props, State> {
           first_row.push(item.grupy_odbiorcow_nazwa);
           first_row_state = 1;
         } else {
-          if (first_row_state === 1) {
-            first_row.push("ogółem");
-            first_row_state = 2;
-          }
           addRows();
         }
         row[0].push(
@@ -902,11 +990,17 @@ export default class Screen extends Component<Props, State> {
         addItemToRows(item);
       }
     });
+
+    if (first_row_state === 1) {
+      first_row.push("ogółem");
+      first_row_state = 2;
+    }
+
     addRows();
     console.log("wynikiSymulacji table:", table);
 
     return (
-      <MDBTable bordered className="p-0">
+      <MDBTable className="bs-2 _lines text-right _zestawienie">
         <MDBTableHead>
           <tr>
             <th>Lp.</th>
@@ -953,7 +1047,7 @@ export default class Screen extends Component<Props, State> {
               <td style={{ width: "100%", padding: 2 }}>
                 <MDBTable borderless className="p-0">
                   <MDBTableBody style={{}}>
-                    <tr>
+                    <tr className="b-1">
                       <td
                         style={{
                           width: "50%",
@@ -962,10 +1056,10 @@ export default class Screen extends Component<Props, State> {
                           borderRight: 1,
                         }}
                       >
-                        <MDBBox tag="h5">Elementy sprzedaży</MDBBox>
+                        {/* <MDBBox tag="h5">Elementy sprzedaży</MDBBox> */}
                       </td>
                       <td style={{ width: "50%", padding: 2, paddingLeft: 10 }}>
-                        <MDBBox tag="h5">Warianty symulacji</MDBBox>
+                        {/* <MDBBox tag="h5">Warianty symulacji</MDBBox> */}
                       </td>
                     </tr>
                     <tr>
@@ -1081,6 +1175,8 @@ export default class Screen extends Component<Props, State> {
                         <MDBBtn
                           size="sm"
                           style={{ width: "250px" }}
+                          color="mdb-color"
+                          outline
                           className="float-right"
                           onClick={this.onPrognozuj}
                         >
@@ -1101,6 +1197,8 @@ export default class Screen extends Component<Props, State> {
                           size="sm"
                           style={{ width: "250px" }}
                           className="float-right"
+                          color="mdb-color"
+                          outline
                           onClick={this.onZapisz}
                         >
                           Zapisz

@@ -18,12 +18,21 @@ router.post("/select_sumy", (req, res) => {
   PopytWarianty.SelectSumy(res, req);
 });
 router.post("/insert", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   PopytWarianty.Insert(res, req);
 });
 router.post("/update", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   PopytWarianty.Update(res, req);
 });
 router.post("/delete", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   PopytWarianty.Delete(res, req);
 });
 

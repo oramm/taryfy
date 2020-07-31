@@ -8,12 +8,21 @@ router.post("/select", (req, res) => {
   GrupyOdbiorcow.Select(res, req);
 });
 router.post("/insert", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   GrupyOdbiorcow.Insert(res, req);
 });
 router.post("/update", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   GrupyOdbiorcow.Update(res, req);
 });
 router.post("/delete", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   GrupyOdbiorcow.Delete(res, req);
 });
 
@@ -53,9 +62,10 @@ class GrupyOdbiorcow {
   }
 
   static Delete(res, req) {
-    let query = "DELETE FROM grupy_odbiorcow WHERE id = " + DB.escape(req.body.data.id);
+    let query =
+      "DELETE FROM grupy_odbiorcow WHERE id = " + DB.escape(req.body.data.id);
     DB.execute(query, res);
   }
 }
 
-export { router as GrupyOdbiorcowRouter};
+export { router as GrupyOdbiorcowRouter };

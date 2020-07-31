@@ -35,6 +35,9 @@ CREATE TABLE uzytkownicy
         ON DELETE CASCADE,
   nazwa varchar(255) NOT NULL,
   haslo varchar(255),
+  uprawnienia int,
+  -- 0 - read only
+  -- 1 - read and write
   wniosek_id int
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -82,6 +85,31 @@ CREATE TABLE zalozenia
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+CREATE TABLE popyt_typ_dict
+(
+  id int NOT NULL primary KEY,
+  typ ENUM("woda","scieki")
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO popyt_typ_dict(id,typ) values (1,"woda");
+INSERT INTO popyt_typ_dict(id,typ) values (2,"scieki");
+
+CREATE TABLE elementy_przychodow_dict
+(
+  id int NOT NULL AUTO_INCREMENT primary KEY,
+  typ_id int NOT NULL,
+  FOREIGN KEY (typ_id)
+        REFERENCES popyt_typ_dict(id),
+  poziom int,
+  nazwa varchar(255) NOT NULL
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"koszty eksploatacji i utrzymania, w  tym:");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,1,"koszty bezpośrednie");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"Amortyzacja");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"Materiały");
+
 CREATE TABLE koszty_typ_dict
 (
   id int NOT NULL primary KEY,
@@ -107,7 +135,9 @@ CREATE TABLE koszty_rodzaje
         REFERENCES koszty_typ_dict(id),
   nazwa varchar(255) NOT NULL,
   opis TEXT,
-  wspolczynnik ENUM("A","B","C","D","E") 
+  elementy_przychodow_id int,
+  FOREIGN KEY (elementy_przychodow_id)
+        REFERENCES elementy_przychodow_dict(id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -134,9 +164,10 @@ CREATE TABLE koszty
   FOREIGN KEY (wniosek_id)
         REFERENCES wnioski(id)
         ON DELETE CASCADE,
-  typ_id int NOT NULL,
-  FOREIGN KEY (typ_id)
-        REFERENCES koszty_typ_dict(id),
+  koszty_rodzaje_id int NOT NULL,
+  FOREIGN KEY (koszty_rodzaje_id)
+        REFERENCES koszty_rodzaje(id)
+        ON DELETE CASCADE,
   rodzaj_nazwa varchar(255) NOT NULL,
   rok_obrachunkowy_1 numeric,
   rok_obrachunkowy_2 numeric,
@@ -146,16 +177,6 @@ CREATE TABLE koszty
   rok_nowych_taryf_3 numeric
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE popyt_typ_dict
-(
-  id int NOT NULL primary KEY,
-  typ ENUM("woda","scieki")
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO popyt_typ_dict(id,typ) values (1,"woda");
-INSERT INTO popyt_typ_dict(id,typ) values (2,"scieki");
 
 CREATE TABLE popyt_element_sprzedazy
 (
@@ -241,5 +262,29 @@ CREATE TABLE popyt_wariant_sumy
   sprzedaz numeric,
   oplaty_abonament numeric,
   wskaznik numeric
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE wspolczynnik_alokacji
+(
+  id int NOT NULL AUTO_INCREMENT primary KEY,
+  typ_id int NOT NULL,
+    FOREIGN KEY (typ_id)
+      REFERENCES popyt_typ_dict(id),
+  okres_id int NOT NULL,
+    FOREIGN KEY (okres_id)
+      REFERENCES okresy_dict(id),        
+  elementy_przychodow_id int,
+    FOREIGN KEY (elementy_przychodow_id)
+      REFERENCES elementy_przychodow_dict(id),
+  popyt_element_sprzedazy_id int,
+    FOREIGN KEY (popyt_element_sprzedazy_id)
+      REFERENCES popyt_element_sprzedazy(id)
+      ON DELETE CASCADE,
+  popyt_warianty_id int,
+    FOREIGN KEY (popyt_warianty_id)
+      REFERENCES popyt_warianty(id)
+      ON DELETE CASCADE,
+  abonament BOOLEAN     
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

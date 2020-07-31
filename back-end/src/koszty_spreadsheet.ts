@@ -13,14 +13,23 @@ router.post("/loaddata", (req, res) => {
 });
 
 router.post("/savedata", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   KosztySpreadsheet.saveData(res, req);
 });
 
 router.post("/insertrodzaje", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   KosztySpreadsheet.insertRodzajeToSpreadsheet(res, req);
 });
 
 router.post("/prognozuj", (req, res) => {
+  if ((req.userData.uprawnienia & 1) !== 1) {
+    return res.status(403).json({ message: "Brak uprawnień do zapisu" });
+  }
   KosztySpreadsheet.prognozuj(res, req);
 });
 
@@ -29,7 +38,6 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 const header = [
   "Wyszczególnienie",
   "Rok obrachunkowy (2017)",
-  "Rok obrachunkowy (2018)",
   "Rok obrachunkowy (2018)",
   "Rok obrachunkowy (2019) - BAZA DO PROGNOZY",
   "1. rok obowiązywania nowych taryf",
@@ -73,9 +81,9 @@ class KosztySpreadsheet {
     const sheet = await KosztySpreadsheet.getSpreadsheet();
     const rows = await sheet.getRows();
     let data = [];
-    for (let i: number = rows.length - 1; i >= 0; i--) {
+    for (let i: number = 0; i < rows.length; i++) {
       Log(0, "KosztySpreadsheet.saveData row[" + i + "]:", rows[i]);
-      data.push({
+      let data_row = {
         rodzaj_nazwa: rows[i][header[0]],
         rok_obrachunkowy_1: rows[i][header[1]],
         rok_obrachunkowy_2: rows[i][header[2]],
@@ -83,7 +91,10 @@ class KosztySpreadsheet {
         rok_nowych_taryf_1: rows[i][header[4]],
         rok_nowych_taryf_2: rows[i][header[5]],
         rok_nowych_taryf_3: rows[i][header[6]],
-      });
+      }
+
+      Log(0, "KosztySpreadsheet.saveData data_row]:", data_row);
+      data.push(data_row);
     }
     //todo: check values
     req.body.data = data;
@@ -145,23 +156,43 @@ class KosztySpreadsheet {
     const rows = await sheet.getRows();
     for (let i: number = rows.length - 1; i >= 0; i--) {
       Log(0, "KosztySpreadsheet.prognozuj row[" + i + "]:", rows[i]);
-      Log(0, "KosztySpreadsheet.prognozuj row[" + i + "][header[4]]:", rows[i][header[4]]);
-      Log(0, "KosztySpreadsheet.prognozuj row[" + i + "][header[4]]:", Number(rows[i][header[4]]));
-      Log(0, "KosztySpreadsheet.prognozuj req.body.wskaznik_1:", req.body.wskaznik_1);
-      Log(0, "KosztySpreadsheet.prognozuj Number(req.body.wskaznik_1):", Number(req.body.wskaznik_1));
-      rows[i][header[5]] = Number(rows[i][header[4]]) * Number(req.body.wskaznik_1);
-      rows[i][header[6]] = Number(rows[i][header[4]]) * Number(req.body.wskaznik_2);
-      rows[i][header[7]] = Number(rows[i][header[4]]) * Number(req.body.wskaznik_3);
-      Log(0, "KosztySpreadsheet.prognozuj row[" + i + "][header[4]]:", rows[i][header[4]]);
+      Log(
+        0,
+        "KosztySpreadsheet.prognozuj row[" + i + "][header[3]]:",
+        rows[i][header[3]]
+      );
+      Log(
+        0,
+        "KosztySpreadsheet.prognozuj row[" + i + "][header[3]]:",
+        Number(rows[i][header[3]])
+      );
+      Log(
+        0,
+        "KosztySpreadsheet.prognozuj req.body.wskaznik_1:",
+        req.body.wskaznik_1
+      );
+      Log(
+        0,
+        "KosztySpreadsheet.prognozuj Number(req.body.wskaznik_1):",
+        Number(req.body.wskaznik_1)
+      );
+      rows[i][header[4]] =
+        Number(rows[i][header[3]]) * Number(req.body.wskaznik_1);
+      rows[i][header[5]] =
+        Number(rows[i][header[3]]) * Number(req.body.wskaznik_2);
+      rows[i][header[6]] =
+        Number(rows[i][header[3]]) * Number(req.body.wskaznik_3);
+      Log(
+        0,
+        "KosztySpreadsheet.prognozuj row[" + i + "][header[3]]:",
+        rows[i][header[3]]
+      );
 
-      try
-      {
-        await rows[i].save()
-      }
-      catch(error)
-      {
+      try {
+        await rows[i].save();
+      } catch (error) {
         res.status(500).json({
-            message: "spreadsheet error:"+error,
+          message: "spreadsheet error:" + error,
         });
       }
     }

@@ -176,9 +176,11 @@ export default class Menu010 extends Component<Props, State> {
     );
   };
 
+  changeHaslo = (haslo: string, haslo1: string, haslo2: string) => {};
+
   render() {
     return (
-      <MDBNavbar color="default-color" dark expand="md" fixed="top">
+      <MDBNavbar color="navbar-background" dark expand="md" fixed="top">
         <MDBNavbarBrand>
           <strong className="white-text">Wnioski taryfowe</strong>
         </MDBNavbarBrand>
@@ -193,6 +195,7 @@ export default class Menu010 extends Component<Props, State> {
           </MDBNavItem>
           <MDBNavItem>
             <MDBBtn
+              color="mdb-color"
               size="sm"
               onClick={() => {
                 this.state.modal_dialogs.nazwaOn(
@@ -205,6 +208,7 @@ export default class Menu010 extends Component<Props, State> {
               Dodaj
             </MDBBtn>
             <MDBBtn
+              color="mdb-color"
               size="sm"
               onClick={() => {
                 console.log("Menu010 edytuj onClick this.state:", this.state);
@@ -218,6 +222,7 @@ export default class Menu010 extends Component<Props, State> {
               Edytuj
             </MDBBtn>
             <MDBBtn
+              color="mdb-color"
               size="sm"
               onClick={() => {
                 console.log("Menu010 kopiuj onClick this.state:", this.state);
@@ -231,6 +236,7 @@ export default class Menu010 extends Component<Props, State> {
               Kopiuj
             </MDBBtn>
             <MDBBtn
+              color="mdb-color"
               size="sm"
               onClick={() =>
                 this.state.modal_dialogs.usunOn(
@@ -251,7 +257,13 @@ export default class Menu010 extends Component<Props, State> {
                 <MDBIcon icon="user" />
               </MDBDropdownToggle>
               <MDBDropdownMenu className="dropdown-default">
-                <MDBDropdownItem>Ustawienia</MDBDropdownItem>
+                <MDBDropdownItem
+                  onClick={() => {
+                    this.state.modal_dialogs.hasloOn(this.changeHaslo);
+                  }}
+                >
+                  Zmiana hasła
+                </MDBDropdownItem>
                 <MDBDropdownItem onClick={this.state.logout_callback}>
                   Wyloguj
                 </MDBDropdownItem>
