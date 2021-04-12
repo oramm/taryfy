@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 var bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
-const port = 5000;
+const port = process.env.PORT || 5006;
 
 import { uzytkownicyRouter } from "./src/uzytkownicy";
 import { wnioskiRouter } from "./src/wnioski";
@@ -18,8 +18,8 @@ import { PopytWariantySymulacjiRouter } from "./src/popyt_warianty_symulacji";
 import { PopytZestawienieRouter } from "./src/popyt_zestawienie";
 import { AlokacjaPrzychodowRouter } from "./src/alokacja_przychodow";
 import { GrupyOdbiorcowRouter } from "./src/grupy_odbiorcow";
+import { WynikiSpreadsheetRouter } from "./src/wyniki";
 import { Log } from "./src/log";
-import { KosztySpreadsheet } from "./src/koszty_spreadsheet";
 
 app.use(express.static("public"));
 //support JSON-encoded bodies
@@ -97,6 +97,7 @@ app.use("/popyt_warianty_symulacji", PopytWariantySymulacjiRouter);
 app.use("/popyt_zestawienie", PopytZestawienieRouter);
 app.use("/alokacja_przychodow", AlokacjaPrzychodowRouter);
 app.use("/grupy_odbiorcow", GrupyOdbiorcowRouter);
+app.use("/wyniki", WynikiSpreadsheetRouter);
 
 //todo: return some error?
 app.use((req, res, next) => {

@@ -322,6 +322,8 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           grupy: {
             [index]: {
               typ_alokacji_abonament: { $set: typ_liczenia },
+              oplaty_abonament: { $set: 0 },
+              oplaty_abonament_wspolczynnik_a: { $set: 0 }
             },
           },
         }),
@@ -501,7 +503,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           <MDBModalHeader>
             {this.props.wariant_symulacji_id === -1
               ? "Dodaj nowy wariant symulacji"
-              : "Edytuj typ kosztów"}
+              : "Edytuj wariant symulacji"}
           </MDBModalHeader>
           <MDBModalBody>
             <MDBTable borderless>
@@ -600,7 +602,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                           </th>
                           <th>jako dopełnienie</th>
                           <th>jako % z całości</th>
-                          <th>liczba odbiorców</th>
+                          {/* <th>liczba odbiorców</th> */}
                         </tr>
                         {this.state.grupy_wybrane.map((item, index) => (
                           <tr key={index}>
@@ -806,7 +808,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                 <td colSpan={6}></td>
                               </>
                             )}
-                            <td>
+                            {/* <td>
                               <MDBInput
                                 noTag
                                 className="text-right"
@@ -828,7 +830,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   );
                                 }}
                               />
-                            </td>
+                            </td> */}
                           </tr>
                         ))}
                         <tr>

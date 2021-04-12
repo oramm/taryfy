@@ -1,0 +1,8 @@
+{
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "envi_taryfy",
+    "port": "3306",
+    "multipleStatements": true
+  }

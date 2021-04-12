@@ -72,9 +72,7 @@ class PopytWarianty {
       " AND okresy_dict.id = popyt_wariant_odbiorcy.okres_id" +
       " AND popyt_wariant_odbiorcy.wariant_id=" +
       DB.escape(req.body.wariant_id) +
-      " WHERE grupy_odbiorcow.typ_id=" +
-      DB.escape(req.body.typ_id) +
-      " AND grupy_odbiorcow.wniosek_id=" +
+      " WHERE grupy_odbiorcow.wniosek_id=" +
       DB.escape(req.body.wniosek_id);
     //"popyt_wariant_odbiorcy.okres_id="+DB.escape(req.body.okres_id) +
 
@@ -108,25 +106,19 @@ class PopytWarianty {
       data
     );
     return (
-      "INSERT INTO popyt_wariant_odbiorcy (wariant_id, grupy_odbiorcow_id, okres_id, sprzedaz, wspolczynnik_alokacji, oplaty_abonament, wspolczynnik_alokacji_abonament, typ, liczba_odbiorcow) VALUES (" +
-      wariant_id +
-      "," +
-      DB.escape(data.grupy_odbiorcow_id_valid) +
-      "," +
-      DB.escape(data.okresy_dict_id) +
-      "," +
-      DB.escape(data.sprzedaz) +
-      "," +
-      DB.escape(data.sprzedaz_wspolczynnik_alokacji) +
-      "," +
-      DB.escape(data.oplaty_abonament) +
-      "," +
-      DB.escape(data.oplaty_abonament_wspolczynnik_a) +
-      ',"' +
-      DB.escape(data.typ_alokacji_abonament) +
-      '",' +
-      DB.escape(data.liczba_odbiorcow) +
-      ")"
+      "INSERT INTO popyt_wariant_odbiorcy"
+      + "(wariant_id, grupy_odbiorcow_id, okres_id, sprzedaz, wspolczynnik_alokacji, oplaty_abonament,"
+      + " wspolczynnik_alokacji_abonament, typ, liczba_odbiorcow) VALUES ("
+      + wariant_id
+      + "," + DB.escape(data.grupy_odbiorcow_id_valid)
+      + "," + DB.escape(data.okresy_dict_id)
+      + "," + DB.escape(data.sprzedaz)
+      + "," + DB.escape(data.sprzedaz_wspolczynnik_alokacji)
+      + "," + DB.escape(data.oplaty_abonament)
+      + "," + DB.escape(data.oplaty_abonament_wspolczynnik_a)
+      + ',"' + DB.escape(data.typ_alokacji_abonament)
+      + '",' + DB.escape(data.liczba_odbiorcow)
+      + ")"
     );
   }
 

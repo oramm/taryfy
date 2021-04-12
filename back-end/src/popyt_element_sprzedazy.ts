@@ -38,7 +38,7 @@ class PopytElementSprzedazy {
 
   static Insert(res, req) {
     let query =
-      "INSERT INTO popyt_element_sprzedazy (wniosek_id, typ_id, nazwa, opis, wspolczynnik, jednostka, abonament, abonament_nazwa, abonament_wspolczynnik) VALUES (" +
+      "INSERT INTO popyt_element_sprzedazy (wniosek_id, typ_id, nazwa, opis, kod_wspolczynnika, jednostka, abonament, abonament_nazwa, abonament_kod_wspolczynnika) VALUES (" +
       req.body.wniosek_id +
       "," +
       req.body.typ_id +
@@ -47,7 +47,7 @@ class PopytElementSprzedazy {
       "," +
       DB.escape(req.body.sprzedaz.opis) +
       "," +
-      DB.escape(req.body.sprzedaz.wspolczynnik) +
+      DB.escape(req.body.sprzedaz.kod_wspolczynnika) +
       "," +
       DB.escape(req.body.sprzedaz.jednostka) +
       "," +
@@ -55,7 +55,7 @@ class PopytElementSprzedazy {
       "," +
       DB.escape(req.body.sprzedaz.abonament_nazwa) +
       "," +
-      DB.escape(req.body.sprzedaz.abonament_wspolczynnik) +
+      DB.escape(req.body.sprzedaz.abonament_kod_wspolczynnika) +
       ")";
     DB.execute(query, res);
   }
@@ -66,16 +66,16 @@ class PopytElementSprzedazy {
       DB.escape(req.body.sprzedaz.nazwa) +
       ", opis=" +
       DB.escape(req.body.sprzedaz.opis) +
-      ", wspolczynnik=" +
-      DB.escape(req.body.sprzedaz.wspolczynnik) +
+      ", kod_wspolczynnika=" +
+      DB.escape(req.body.sprzedaz.kod_wspolczynnika) +
       ", jednostka=" +
       DB.escape(req.body.sprzedaz.jednostka) +
       ", abonament=" +
       DB.escape(req.body.sprzedaz.abonament) +
       ", abonament_nazwa=" +
       DB.escape(req.body.sprzedaz.abonament_nazwa) +
-      ", abonament_wspolczynnik=" +
-      DB.escape(req.body.sprzedaz.abonament_wspolczynnik) +
+      ", abonament_kod_wspolczynnika=" +
+      DB.escape(req.body.sprzedaz.abonament_kod_wspolczynnika) +
       ", wariant_id=" +
       DB.escape(req.body.sprzedaz.wariant_id) +
       " WHERE id=" +

@@ -11,6 +11,7 @@ import { Screen020_koszty } from "./screen020_koszty";
 import { Screen040_popyt } from "./screen040_popyt";
 import { Screen050_grupy_odbiorcow } from "./screen050_grupy_odbiorcow";
 import { Screen060_alokacja_przychodow } from "./screen060_alokacja_przychodow";
+import { Screen_wyniki } from "./screen_wyniki";
 import Screen900 from "./screen900_";
 import { setPostToken, setPostModals } from "./post";
 import {
@@ -37,14 +38,14 @@ let Menu020Items: string[] = [
   "Grupy odbiorców",
   "Koszty",
   "Kredyty i pożyczki",
-  "Popyt",
+  "Współczynniki alokacji",
   "Alokacja przychodów",
   "Wyniki",
 ];
 
 let Menu030Items: string[][] = [
   [],
-  ["Grupy Odbiorców - Woda", "Grupy Odbiorców - Ścieki"],
+  [],
   [
     "Koszty - Woda",
     "Koszty - Ścieki",
@@ -53,7 +54,7 @@ let Menu030Items: string[][] = [
     "Koszty inne",
   ],
   [],
-  ["Popyt - Woda", "Popyt - Ścieki"],
+  ["Współczynniki alokacji - Woda", "Współczynniki alokacji - Ścieki"],
   ["Alokacja - Woda", "Alokacja - Ścieki"],
 ];
 
@@ -162,7 +163,6 @@ export default class Main extends Component<Props, State> {
                     ) : this.state.menu020 === 1 ? (
                       <Screen050_grupy_odbiorcow
                         wniosek_id={this.state.wniosek_id}
-                        typ_id={this.state.menu030 + 1}
                         modal_dialogs={this._modal_dialogs}
                       />
                     ) : this.state.menu020 === 2 ? (
@@ -185,6 +185,13 @@ export default class Main extends Component<Props, State> {
                         typ_id={this.state.menu030 + 1}
                         modal_dialogs={this._modal_dialogs}
                       />
+                      ) : this.state.menu020 === 6 ? (
+                        <Screen_wyniki
+                        wniosek_id={this.state.wniosek_id}
+                        typ_id={this.state.menu030 + 1}
+                        modal_dialogs={this._modal_dialogs}
+                      />
+                      
                     ) : (
                       <Screen900 nazwa={this.state.menu020_name} />
                     )}

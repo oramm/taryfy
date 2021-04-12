@@ -4,6 +4,14 @@ export type GrupyOdbiorcow = {
   typ_id: number;
   nazwa: string;
   opis: string;
+  przychody_woda: number;
+  przychody_scieki: number;
+  liczba_odbiorcow_1: number;
+  liczba_odbiorcow_2: number;
+  liczba_odbiorcow_3: number;
+  liczba_odbiorcow_scieki_1: number;
+  liczba_odbiorcow_scieki_2: number;
+  liczba_odbiorcow_scieki_3: number;
 };
 
 export let GrupyOdbiorcowEmpty: GrupyOdbiorcow = {
@@ -12,6 +20,14 @@ export let GrupyOdbiorcowEmpty: GrupyOdbiorcow = {
   typ_id: 0,
   nazwa: "",
   opis: "",
+  przychody_woda: 0,
+  przychody_scieki: 0,
+  liczba_odbiorcow_1: 0,
+  liczba_odbiorcow_2: 0,
+  liczba_odbiorcow_3: 0,
+  liczba_odbiorcow_scieki_1: 0,
+  liczba_odbiorcow_scieki_2: 0,
+  liczba_odbiorcow_scieki_3: 0,
 };
 
 export type Klienci = {
@@ -183,11 +199,11 @@ export type ElementSprzedazy = {
   nazwa: string;
   nazwa_invalid: boolean;
   opis: string;
-  wspolczynnik: string;
+  kod_wspolczynnika: string;
   jednostka: string;
   abonament: boolean;
   abonament_nazwa: string;
-  abonament_wspolczynnik: string;
+  abonament_kod_wspolczynnika: string;
   wariant_id: number;
 };
 
@@ -215,8 +231,10 @@ export type WspolczynnikAlokacjiSelected = {
 export type WspolczynnikAlokacji = {
   popyt_element_sprzedazy_id: number;
   popyt_element_sprzedazy_nazwa: string;
+  popyt_element_sprzedazy_kod_wspolczynnika: string;
   popyt_element_sprzedazy_abonament_nazwa: string;
   popyt_element_sprzedazy_abonament: boolean;
+  popyt_element_sprzedazy_abonament_kod_wspolczynnika: string
   popyt_warianty_id: number;
   popyt_warianty_nazwa: string;
 };

@@ -39,7 +39,7 @@ class KosztyWskazniki {
       req.body.wniosek_id +
       ", " +
       req.body.typ_id +
-      ",1,1,1 WHERE NOT EXISTS (SELECT * FROM koszty_wskazniki WHERE wniosek_id=" +
+      ",1,1,1 FROM dual WHERE NOT EXISTS (SELECT * FROM koszty_wskazniki WHERE wniosek_id=" +
       req.body.wniosek_id +
       " AND typ_id=" +
       req.body.typ_id +

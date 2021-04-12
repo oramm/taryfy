@@ -65,6 +65,7 @@ export default class Screen extends Component<Props, State> {
     elementy_sprzedazy: [],
     elementy_sprzedazy_selected: -1,
     warianty_symulacji: [],
+    warianty_symulacji_selected: -1,
     wskaznik_1: "1.0",
     wskaznik_2: "1.0",
     wskaznik_3: "1.0",
@@ -78,16 +79,15 @@ export default class Screen extends Component<Props, State> {
       nazwa: "",
       nazwa_invalid: false,
       opis: "",
-      wspolczynnik: "",
+      kod_wspolczynnika: "",
       jednostka: "",
       abonament: false,
       abonament_nazwa: "",
-      abonament_wspolczynnik: "",
+      abonament_kod_wspolczynnika: "",
       wariant_id: 0,
     },
     modal_sprzedaz_on: false,
     modal_wariant_label: "",
-    warianty_symulacji_selected: -1,
     modal_wariant_id: -1,
     modal_wariant_on: false,
     //modal_wariant_add_new: false,
@@ -107,7 +107,21 @@ export default class Screen extends Component<Props, State> {
       () => {
         console.log("UNSAFE_componentWillReceiveProps state:", this.state);
         cancel();
-        this.loadData();
+        this.setState(
+          (prevState) => {
+            return update(prevState, {
+              warianty_symulacji: { $set: []},
+              warianty_symulacji_selected: { $set: -1},
+              elementy_sprzedazy: { $set: []},
+              elementy_sprzedazy_selected: { $set: -1},
+            });
+          },
+          () =>
+          {
+            console.log("NSAFE_componentWillReceiveProps update state:", this.state)
+            this.loadData();
+          }
+        );
       }
     );
   }
@@ -182,31 +196,28 @@ export default class Screen extends Component<Props, State> {
 
   onWariantSymulacjiUsun = (id: number) => {
     console.log("Screen040 onWariantSymulacjiUsun id:", id);
-    let element_sprzedazy_id: number | null = null;
+    let element_sprzedazy_index: number | null = null;
     if (
       this.state.elementy_sprzedazy[this.state.elementy_sprzedazy_selected]
         .wariant_id === id
     ) {
-      element_sprzedazy_id = this.state.elementy_sprzedazy[
-        this.state.elementy_sprzedazy_selected
-      ].id;
+      element_sprzedazy_index = this.state.elementy_sprzedazy_selected;
     }
     post(
       "/popyt_warianty_symulacji/delete",
       {
         id: id,
-        element_sprzedazy_id: element_sprzedazy_id,
+        element_sprzedazy_id: element_sprzedazy_index,
       },
       (response) => {
         console.log("Screen040 onWariantSymulacjiUsun response", response);
-        if (element_sprzedazy_id) {
-          let element_id: number = 0;
-          element_id = element_sprzedazy_id;
+        if (element_sprzedazy_index) {
+          let element_index = Number(element_sprzedazy_index);
           this.setState(
             (prevState) => {
               return update(prevState, {
                 elementy_sprzedazy: {
-                  [element_id]: { wariant_id: { $set: 0 } },
+                  [element_index]: { wariant_id: { $set: 0 } },
                 },
               });
             },
@@ -250,6 +261,7 @@ export default class Screen extends Component<Props, State> {
           },
           () => {
             console.log("loadDataElementySprzedazy state:", this.state);
+            
             this.loadDataZestawienie();
           }
         );
@@ -303,6 +315,7 @@ export default class Screen extends Component<Props, State> {
         wniosek_id: this.state.wniosek_id,
         okres_id: this.state.okres_id,
         typ_id: this.state.typ_id,
+        add_wariant: true,
       },
       (response) => {
         console.log("loadDataZestawienie response:", response);
@@ -428,16 +441,36 @@ export default class Screen extends Component<Props, State> {
               );
             }}
           ></MDBInput>
-          {GrupyAllokacjiControl(
-            this.state.modal_sprzedaz.wspolczynnik,
-            "Współczynnik alokacji:",
+          <MDBInput
+            type="text"
+            label="Kod współczynnika:"
+            value={this.state.modal_sprzedaz.kod_wspolczynnika}
+            onChange={(event) => {
+              const { value } = event.currentTarget;
+              this.setState(
+                (prevState) => {
+                  return update(prevState, {
+                    modal_sprzedaz: { kod_wspolczynnika: { $set: value } },
+                  });
+                },
+                () =>
+                  console.log(
+                    "Screen040 modalElementSprzedarzyOn kod_wspolczynnika state:",
+                    this.state
+                  )
+              );
+            }}
+          ></MDBInput>
+          {/* {GrupyAllokacjiControl(
+            this.state.modal_sprzedaz.kod_wspolczynnika,
+            "Kod współczynnika:",
             (event) => {
               const { value } = event.currentTarget;
               let state = this.state;
-              state.modal_sprzedaz.wspolczynnik = value;
+              state.modal_sprzedaz.kod_wspolczynnika = value;
               this.setState(state);
             }
-          )}
+          )} */}
 
           {this.state.modal_sprzedaz.abonament ? (
             <MDBInput
@@ -503,16 +536,28 @@ export default class Screen extends Component<Props, State> {
                 this.setState(state);
               }}
             ></MDBInput>
-            {GrupyAllokacjiControl(
-              this.state.modal_sprzedaz.abonament_wspolczynnik,
-              "Współczynnik alokacji - abonament",
+            
+            <MDBInput
+              type="text"
+              label="Abonament - kod współczynnika alokacji:"
+              value={this.state.modal_sprzedaz.abonament_kod_wspolczynnika}
+              onChange={(event) => {
+                const { value } = event.currentTarget;
+                let state = this.state;
+                state.modal_sprzedaz.abonament_kod_wspolczynnika = value;
+                this.setState(state);
+              }}
+            ></MDBInput>
+            {/* {GrupyAllokacjiControl(
+              this.state.modal_sprzedaz.abonament_kod_wspolczynnika,
+              "Abonament - kod współczynnika alokacji",
               (event) => {
                 const { value } = event.currentTarget;
                 let state = this.state;
-                state.modal_sprzedaz.abonament_wspolczynnik = value;
+                state.modal_sprzedaz.abonament_kod_wspolczynnika = value;
                 this.setState(state);
               }
-            )}
+            )} */}
           </MDBContainer>
         </MDBModalBody>
         <MDBModalFooter>
@@ -554,7 +599,7 @@ export default class Screen extends Component<Props, State> {
             <tr>
               <td colSpan={3}>
                 <div className="d-flex justify-content-between">
-                  <MDBBox tag="h5">Elementy sprzedaży</MDBBox>
+                  <MDBBox tag="h5">Współczynniki  alokacji</MDBBox>
                   <MDBBtn
                     size="sm"
                     style={{ width: "250px" }}
@@ -563,7 +608,7 @@ export default class Screen extends Component<Props, State> {
                     className="float-right"
                     onClick={() =>
                       this.modalElementSprzedarzyOn(
-                        "Dodaj nowy element sprzedaży",
+                        "Dodaj nowy współczynnik alokacji",
                         {
                           id: 0,
                           wniosek_id: 0,
@@ -571,18 +616,18 @@ export default class Screen extends Component<Props, State> {
                           nazwa: "",
                           nazwa_invalid: false,
                           opis: "",
-                          wspolczynnik: "",
+                          kod_wspolczynnika: "",
                           jednostka: "",
                           abonament: false,
                           abonament_nazwa: "",
-                          abonament_wspolczynnik: "",
+                          abonament_kod_wspolczynnika: "",
                           wariant_id: 0,
                         },
                         this.onElementSprzedazyDodaj
                       )
                     }
                   >
-                    Dodaj nowy element sprzedaży
+                    Dodaj nowy współczynniki alokacji
                   </MDBBtn>
                 </div>
               </td>
@@ -655,7 +700,7 @@ export default class Screen extends Component<Props, State> {
                     className="rounded flat_button pointer"
                     onClick={() => {
                       this.modalElementSprzedarzyOn(
-                        "Edytuj typ kosztów",
+                        "Edytuj wpółczynnik alokacji",
                         item,
                         this.onElementSprzedazyEdytuj
                       );
@@ -914,91 +959,8 @@ export default class Screen extends Component<Props, State> {
   };
 
   wynikiSymulacji = () => {
-    let table: string[][] = [];
-    let last_id = -1;
-    let first_row: string[] = [];
-    let first_row_state = 0; //0 - not started, 1 - under construction, 2 - finished
-    let row1: string[] = [];
-    let row2: string[] = [];
-    let row3: string[] = [];
-    let row4: string[] = [];
-    let row: string[][] = [row1, row2, row3, row4];
     let row_counter = 0;
-    let sum: number[] = [0, 0, 0, 0];
-
-    let addRows = () => {
-      row.map((item: string[], index: number) => {
-        if (item !== [] && item.length !== 0) {
-          console.log("wynikiSymulacji row:", item);
-          console.log(
-            "wynikiSymulacji String(sum[index]):",
-            String(sum[index])
-          );
-          item.push(String(sum[index]));
-          console.log("wynikiSymulacji row:", item);
-          table.push(item);
-        }
-        sum[index] = 0;
-        row[index] = [];
-      });
-    };
-    let addItemToRows = (item: any) => {
-      row[0].push(item.sprzedaz || "");
-      row[1].push(item.wspolczynnik_alokacji || "");
-      row[2].push(item.oplaty_abonament || "");
-      row[3].push(item.wspolczynnik_alokacji_abonament || "");
-      sum[0] += Number(item.sprzedaz);
-      sum[1] += Number(item.wspolczynnik_alokacji);
-      sum[2] += Number(item.oplaty_abonament);
-      sum[3] += Number(item.wspolczynnik_alokacji_abonament);
-    };
-    this.state.zestawienie.map((item: any, index: number) => {
-      if (item.element_sprzedazy_id === last_id) {
-        //next elements in list for one element_sprzedazy
-        if (first_row_state === 1) {
-          first_row.push(item.grupy_odbiorcow_nazwa);
-        }
-        addItemToRows(item);
-      } else {
-        //first element in list for one element_sprzedazy
-        last_id = item.element_sprzedazy_id;
-        if (first_row_state === 0) {
-          first_row.push(item.grupy_odbiorcow_nazwa);
-          first_row_state = 1;
-        } else {
-          addRows();
-        }
-        row[0].push(
-          "<rowSpan>" +
-            item.element_sprzedazy_wspolczynnik +
-            " " +
-            item.wariant_nazwa
-        );
-        row[0].push("<rowSpan>" + item.element_sprzedazy_nazwa);
-        row[0].push(item.element_sprzedazy_jednostka);
-        row[1].push("%");
-        if (item.element_sprzedazy_abonament)
-          row[2].push(
-            "<rowSpan>" +
-              item.element_sprzedazy_abonament_wspolczynnik +
-              " " +
-              item.wariant_nazwa
-          );
-        row[2].push("<rowSpan>" + item.element_sprzedazy_abonament_nazwa);
-        row[2].push("zł");
-        row[3].push("%");
-        addItemToRows(item);
-      }
-    });
-
-    if (first_row_state === 1) {
-      first_row.push("ogółem");
-      first_row_state = 2;
-    }
-
-    addRows();
-    console.log("wynikiSymulacji table:", table);
-
+    let Okresy = ["1 do 12", "13 do 24", "25 do 36"];
     return (
       <MDBTable className="bs-2 _lines text-right _zestawienie">
         <MDBTableHead>
@@ -1006,32 +968,35 @@ export default class Screen extends Component<Props, State> {
             <th>Lp.</th>
             <th>Współczynnik alokacji</th>
             <th>
-              Wyszczególnienie w okresie od 25 do 36 miesiąca obowiązywania
+              Wyszczególnienie w okresie od {Okresy[this.state.okres_id-1]} miesiąca obowiązywania
               nowej taryfy
             </th>
             <th>Jedn. Miary</th>
-            <th colSpan={first_row.length}>Taryfowa grupa odbiorców usług</th>
+            <th colSpan={this.state.zestawienie && this.state.zestawienie[0] && this.state.zestawienie[0].length}>Taryfowa grupa odbiorców usług</th>
           </tr>
         </MDBTableHead>
         <MDBTableBody style={{ width: "100%" }}>
-          <tr>
-            <td colSpan={4}></td>
-            {first_row.map((item: string, index: number) => (
-              <td>{item}</td>
-            ))}
-          </tr>
-          {table.map((item, index) => (
-            <tr>
-              <td>{++row_counter}</td>
-              {item.map((item2: string, index2) =>
-                typeof item2 === "string" && item2.includes("<rowSpan>") ? (
-                  <td rowSpan={2}>{item2.substr(9)}</td>
-                ) : (
-                  <td>{item2}</td>
-                )
-              )}
-            </tr>
-          ))}
+          {this.state.zestawienie && this.state.zestawienie.map((item, index) =>
+            index == 0 ? (
+              <tr>
+                <td colSpan={4}></td>
+                {this.state.zestawienie[0].map((item: string, index: number) => (
+                  <td>{item}</td>
+                ))}
+              </tr>
+            ) : (
+              <tr>
+                <td>{++row_counter}</td>
+                {item.map((item2: string, index2: number) =>
+                  typeof item2 === "string" && item2.includes("<rowSpan>") ? (
+                    <td rowSpan={2}>{item2.substr(9)}</td>
+                  ) : (
+                    typeof item2 === "string" && item2.includes("<empty>") ? <></> : <td>{item2}</td>
+                  )
+                )}
+              </tr>
+            )
+          )}
         </MDBTableBody>
       </MDBTable>
     );

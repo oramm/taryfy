@@ -27,6 +27,7 @@ type Props = {
 type State = {
   wniosek_id: number;
   typ_id: number;
+  link: string;
   koszty_rodzaje: KosztyRodzaje[];
   elementy_przychodow: ElementPrzychodu[];
   wskaznik_id: number;
@@ -47,6 +48,7 @@ class Screen020 extends Component<Props, State> {
   state: State = {
     wniosek_id: 0,
     typ_id: 1,
+    link: "",
     koszty_rodzaje: [],
     elementy_przychodow: [],
     wskaznik_id: 0,
@@ -164,21 +166,21 @@ class Screen020 extends Component<Props, State> {
       },
       (response) => {
         console.log("onPrognozuj /koszty_wskazniki/update response:", response);
-      }
-    );
-    post(
-      "/koszty_spreadsheet/prognozuj",
-      {
-        wniosek_id: this.state.wniosek_id,
-        typ_id: this.state.typ_id,
-        wskaznik_1: this.state.wskaznik_1,
-        wskaznik_2: this.state.wskaznik_2,
-        wskaznik_3: this.state.wskaznik_3,
-      },
-      (response) => {
-        console.log(
-          "onPrognozuj /koszty_sprzedsheet/prognozuj response:",
-          response
+        post(
+          "/koszty_spreadsheet/prognozuj",
+          {
+            wniosek_id: this.state.wniosek_id,
+            typ_id: this.state.typ_id,
+            wskaznik_1: this.state.wskaznik_1,
+            wskaznik_2: this.state.wskaznik_2,
+            wskaznik_3: this.state.wskaznik_3,
+          },
+          (response) => {
+            console.log(
+              "onPrognozuj /koszty_sprzedsheet/prognozuj response:",
+              response
+            );
+          }
         );
       }
     );
@@ -200,13 +202,14 @@ class Screen020 extends Component<Props, State> {
 
   loadSpreadsheet = () => {
     post(
-      "/koszty_spreadsheet/loaddata",
+      "/koszty_spreadsheet/loadspreadsheet",
       {
         wniosek_id: this.state.wniosek_id,
         typ_id: this.state.typ_id,
       },
       (response) => {
-        console.log("/koszty_spreadsheet/loaddata response:", response);
+        this.setState({ link: response.data.link }, () =>
+        console.log("/koszty_spreadsheet/loadspreadsheet response:", response))
       }
     );
   };
@@ -463,7 +466,7 @@ class Screen020 extends Component<Props, State> {
   render() {
     return (
       <>
-        {this.modalRodzajKosztow()}
+        {/* {this.modalRodzajKosztow()}
         <MDBBtn
           size="sm"
           color="mdb-color"
@@ -492,7 +495,7 @@ class Screen020 extends Component<Props, State> {
           onClick={this.insertRodzajeToSpreadsheet}
         >
           Kopiuj rodzaje kosztów do tabeli
-        </MDBBtn>
+        </MDBBtn> */}
 
         {/*todo: use global style
  .koszty_rodzaje_table td {
@@ -582,8 +585,9 @@ class Screen020 extends Component<Props, State> {
                   <iframe
                     width="100%"
                     title="spreadsheet"
-                    height="400"
-                    src="https://docs.google.com/spreadsheets/d/1Whi0wLCOyF1NSjc04vMDNXs3xcOvJL5Qd1FZV_gwnAk/edit?rm=minimal"
+                    height="900"
+                    src={this.state.link}
+                    //src="https://docs.google.com/spreadsheets/d/1Whi0wLCOyF1NSjc04vMDNXs3xcOvJL5Qd1FZV_gwnAk/edit?rm=minimal"
                   ></iframe>
                 </MDBBox>
               </td>

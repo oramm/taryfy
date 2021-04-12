@@ -107,19 +107,22 @@ let GrupyAllokacjiControl = (
 
 let Okresy = ["1-12", "13-24", "25-36"];
 let OkresyControl = (
-  callback: (index: number, value: string) => void,
-  selected_item: number
+  callback: (index: number, value: string) => void, 
+  selected_item: number,
+  prefix?: boolean
 ) => {
+  let okresy_temp = prefix ? ["-11-0"].concat(Okresy) : Okresy;
   return (
     <MDBBtnGroup>
-      {Okresy.map((name, index) => (
+      {okresy_temp.map((name, index) => (
         <MDBBox key={index}>
           <MDBBtn
             onClick={() => callback(index, name)}
             size="sm"
-            color="mdb-color"
+            color={selected_item === index + (prefix ? 0 : 1) ? "dark" : "mdb-color"}
             outline
-            active={selected_item === index + 1}
+            //active={selected_item === index ? true : false}
+            active={selected_item === index + (prefix ? 0 : 1)}
           >
             {name}
           </MDBBtn>
@@ -591,7 +594,7 @@ let ElementPrzychoduControl = (
           {elementy_przychodow.map((item: ElementPrzychodu, index: number) => {
             if (selected === 0 && item.poziom === 2) selected = item.id;
             return (
-              item.poziom === 2 ? <option
+              index === elementy_przychodow.length - 1 || item.poziom >= elementy_przychodow[index+1].poziom ? <option
                 value={item.id}
                 selected={item.id === elementy_przychodow_selected_id}
               >

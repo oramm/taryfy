@@ -37,7 +37,8 @@ class DBAccess {
     Log(0, "SelectElementyPrzychodow received req.body=", req.body);
     let query =
       "SELECT id,poziom,nazwa FROM elementy_przychodow_dict WHERE typ_id = " +
-      DB.escape(req.body.typ_id);
+      DB.escape(req.body.typ_id) +
+      " ORDER BY id";
     DB.execute(query, res);
   }
 
@@ -47,8 +48,10 @@ class DBAccess {
       "SELECT" +
       " popyt_element_sprzedazy.id as popyt_element_sprzedazy_id" +
       ", popyt_element_sprzedazy.nazwa as popyt_element_sprzedazy_nazwa" +
+      ", popyt_element_sprzedazy.kod_wspolczynnika as popyt_element_sprzedazy_kod_wspolczynnika" +
       ", popyt_element_sprzedazy.abonament_nazwa as popyt_element_sprzedazy_abonament_nazwa" +
       ", popyt_element_sprzedazy.abonament as popyt_element_sprzedazy_abonament" +
+      ", popyt_element_sprzedazy.abonament_kod_wspolczynnika as popyt_element_sprzedazy_abonament_kod_wspolczynnika" +     
       ", popyt_warianty.id as popyt_warianty_id" +
       ", popyt_warianty.nazwa as popyt_warianty_nazwa" +
       " FROM" +
@@ -76,6 +79,9 @@ class DBAccess {
       " WHERE" +
       " typ_id =" +
       DB.escape(req.body.typ_id) +
+      " AND popyt_element_sprzedazy_id IN (SELECT id FROM popyt_element_sprzedazy WHERE wniosek_id = " +
+      DB.escape(req.body.wniosek_id) +
+      ") " +
       " AND okres_id = " +
       DB.escape(req.body.okres_id);
 
@@ -136,35 +142,46 @@ class DBAccess {
   static Update(res, req) {
     Log(0, "Update received req.body=", req.body);
     let query =
-      "START TRANSACTION; DELETE FROM wspolczynnik_alokacji" +
-      " WHERE typ_id =" +
+      "START TRANSACTION; DELETE FROM wspolczynnik_alokacji WHERE popyt_element_sprzedazy_id IN (SELECT id FROM popyt_element_sprzedazy WHERE wniosek_id = "
+      + DB.escape(req.body.wniosek_id)
+      + ")"
+      + " AND typ_id =" +
       DB.escape(req.body.typ_id) +
-      " AND okres_id = " +
-      DB.escape(req.body.okres_id) +
+      (req.body.powiel === true ? "" : (" AND okres_id = " +
+      DB.escape(req.body.okres_id))) +
       ";";
-    for (let item of req.body.wspolczynnik_alokacji_selected) {
-      query +=
-        " INSERT INTO wspolczynnik_alokacji (" +
-        " typ_id" +
-        " , okres_id" +
-        " , elementy_przychodow_id" +
-        " , popyt_element_sprzedazy_id" +
-        " , popyt_warianty_id" +
-        " , abonament)" +
-        " VALUES(" +
-        DB.escape(req.body.typ_id) +
-        "," +
-        DB.escape(req.body.okres_id) +
-        "," +
-        DB.escape(item.elementy_przychodow_id) +
-        "," +
-        DB.escape(item.popyt_element_sprzedazy_id) +
-        "," +
-        DB.escape(item.popyt_warianty_id) +
-        "," +
-        DB.escape(item.abonament) +
-        ");";
+    let okresy = [Number(req.body.okres_id)];
+    if (req.body.powiel === true)
+    {
+      okresy[0] = 1;
+      okresy[1] = 2;
+      okresy[2] = 3;
     }
+    okresy.forEach((okres,index)=>{
+      for (let item of req.body.wspolczynnik_alokacji_selected) {
+        query +=
+          " INSERT INTO wspolczynnik_alokacji (" +
+          " typ_id" +
+          " , okres_id" +
+          " , elementy_przychodow_id" +
+          " , popyt_element_sprzedazy_id" +
+          " , popyt_warianty_id" +
+          " , abonament)" +
+          " VALUES(" +
+          DB.escape(req.body.typ_id) +
+          "," +
+          DB.escape(okres) +
+          "," +
+          DB.escape(item.elementy_przychodow_id) +
+          "," +
+          DB.escape(item.popyt_element_sprzedazy_id) +
+          "," +
+          DB.escape(item.popyt_warianty_id) +
+          "," +
+          DB.escape(item.abonament) +
+          ");";
+      }
+    })
     query += "COMMIT;";
     DB.execute(query, res);
   }

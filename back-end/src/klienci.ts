@@ -33,17 +33,18 @@ class Klienci {
         );
       } else {
         let query =
-          "INSERT INTO klienci (nazwa, opis, adres, nip) SELECT " +
-          DB.escape(klient.nazwa) +
-          "," +
-          DB.escape(klient.opis) +
-          "," +
-          DB.escape(klient.adres) +
-          "," +
-          DB.escape(klient.nip) +
-          " WHERE NOT EXISTS (SELECT * FROM klienci WHERE nazwa=" +
-          DB.escape(klient.nazwa) +
-          ");";
+          "INSERT INTO klienci (nazwa, opis, adres, nip) SELECT "
+          + DB.escape(klient.nazwa)
+          + ","
+          + DB.escape(klient.opis)
+          + ","
+          + DB.escape(klient.adres)
+          + ","
+          + DB.escape(klient.nip)
+          + " FROM dual WHERE NOT EXISTS (SELECT * FROM klienci WHERE nazwa="
+          + DB.escape(klient.nazwa)
+          + ");"
+          ;
         return await DB.executeAsync(query, null, (error, result) => {
           if (error)
             Log(0, "Nie udało się dodać klienta o nazwie: ", klient.nazwa);

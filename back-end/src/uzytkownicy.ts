@@ -36,6 +36,9 @@ class Uzytkownicy {
 
     DB.execute(query, null, (error, result) => {
       if (error) {
+        return res.status(401).json({
+          message: "Login failed, error:" + error,
+        });
       } else if (!result.length || result.length < 1) {
         Log(0, "Uzytkownicy login failed");
         return res.status(401).json({
@@ -125,7 +128,7 @@ class Uzytkownicy {
                     DB.escape(hash) +
                     "," +
                     DB.escape(user.uprawnienia) +
-                    " WHERE NOT EXISTS (SELECT * FROM uzytkownicy WHERE nazwa=" +
+                    " FROM dual WHERE NOT EXISTS (SELECT * FROM uzytkownicy WHERE nazwa=" +
                     DB.escape(user.nazwa) +
                     ") AND EXISTS (SELECT * FROM klienci WHERE nazwa LIKE " +
                     DB.escape(user.klient_nazwa) +

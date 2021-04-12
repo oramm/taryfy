@@ -29,9 +29,7 @@ router.post("/delete", (req, res) => {
 class KosztyRodzaje {
   static Select(res, req) {
     let query =
-      "SELECT * from koszty_rodzaje WHERE wniosek_id=" +
-      req.body.wniosek_id +
-      " AND typ_id=" +
+      "SELECT * from koszty_rodzaje WHERE typ_id=" +
       req.body.typ_id +
       " ORDER BY id";
     DB.execute(query, res);

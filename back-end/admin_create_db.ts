@@ -13,4 +13,10 @@ import { Log } from "./src/log";
       await DB.execute(sql);
     }
   });
+  // var fs = require("fs");
+  // var sql = fs.readFileSync("./src/sql/create_db.sql").toString();
+  // Log(0, "file len: " + fs.readFileSync("./src/sql/create_db.sql").length);
+  // // Log(0, "sql: " + sql);
+  // await DB.execute(sql);
+
 })();

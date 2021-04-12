@@ -61,6 +61,11 @@ input[type="number"] {
  color: #a00000; 
 }
 
+._button_selected
+{
+ color: #a00000; 
+}
+
 table.wariant,
 table.wariant th,
 table.wariant th td,
