@@ -56,7 +56,8 @@ function authorize(credentials) {
 async function getNewToken(oAuth2Client) {
   Log(0, "getNewToken");
   return oAuth2Client
-    .getToken("4/1AY0e-g7YO7w9X9JNAgiRt8059sZxb8gUNqOaRJcu4aFKVv7VnPYpTlgs3M4")
+    //.getToken("4/1AX4XfWj1zgomjeWZD9wjc88Rd7ofIb-R3KrjViBaMPj4Zuylc7Y8Dj_Iipo")  //server
+    .getToken("4/1AY0e-g7YO7w9X9JNAgiRt8059sZxb8gUNqOaRJcu4aFKVv7VnPYpTlgs3M4") //home
     .then((token) => {
       Log(0, "getNewToken token:", token);
       oAuth2Client.setCredentials(token);

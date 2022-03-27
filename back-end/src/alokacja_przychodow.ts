@@ -2,9 +2,8 @@ const express = require("express");
 
 var router = express.Router();
 
-import { Log } from "./Log";
+import { Log } from "./log";
 import { DB } from "./db_util";
-import { WspolczynnikAlokacjiSelected } from "../../common/model";
 
 router.post("/select_elementy_przychodow", (req, res) => {
   DBAccess.SelectElementyPrzychodow(res, req);
@@ -21,9 +20,9 @@ router.post("/select_grupy_wspolczynnik", (req, res) => {
   DBAccess.SelectGrupyWspolczynnik(res, req);
 });
 
-router.post("/select_koszty", (req, res) => {
-  DBAccess.SelectKoszty(res, req);
-});
+// router.post("/select_koszty", (req, res) => {
+//   DBAccess.SelectKoszty(res, req);
+// });
 
 router.post("/update", (req, res) => {
   if ((req.userData.uprawnienia & 1) !== 1) {
@@ -35,10 +34,35 @@ router.post("/update", (req, res) => {
 class DBAccess {
   static SelectElementyPrzychodow(res, req) {
     Log(0, "SelectElementyPrzychodow received req.body=", req.body);
+    let query_koszty = "";
+    switch(req.body.okres_id)
+    {
+      case 1:
+        query_koszty =  ", IFNULL(SUM(koszty.rok_nowych_taryf_1),0) as koszt";
+        break;
+        case 2:
+        query_koszty =  ", IFNULL(SUM(koszty.rok_nowych_taryf_2),0) as koszt";
+        break;
+        case 3:
+        query_koszty =  ", IFNULL(SUM(koszty.rok_nowych_taryf_3),0) as koszt";
+        break;
+    }    
     let query =
-      "SELECT id,poziom,nazwa FROM elementy_przychodow_dict WHERE typ_id = " +
-      DB.escape(req.body.typ_id) +
-      " ORDER BY id";
+      "SELECT"
+      + " elementy_przychodow_dict.id as id"
+      + ", elementy_przychodow_dict.poziom as poziom"
+      + ", elementy_przychodow_dict.nazwa as nazwa"
+      + query_koszty
+      + " FROM"
+      + " elementy_przychodow_dict"
+      + " LEFT JOIN"
+      + " koszty"
+      + " ON koszty.koszty_rodzaje_id = elementy_przychodow_dict.koszty_rodzaje_id"
+      + " AND koszty.wniosek_id = " + DB.escape(req.body.wniosek_id)
+      + " WHERE"
+      + " elementy_przychodow_dict.typ_id = " + DB.escape(req.body.typ_id)
+      + " GROUP BY elementy_przychodow_dict.id";
+      + " ORDER BY elementy_przychodow_dict.id";
     DB.execute(query, res);
   }
 
@@ -90,6 +114,19 @@ class DBAccess {
 
   static SelectGrupyWspolczynnik(res, req) {
     Log(0, "SelectGrupaWspolczynnik received req.body=", req.body);
+    let koszt_okres = "";
+    switch(req.body.okres_id)
+    {
+      case 1:
+        koszt_okres =  "SUM(koszty.rok_nowych_taryf_1) as koszt";
+        break;
+      case 2:
+        koszt_okres =  "SUM(koszty.rok_nowych_taryf_2) as koszt";
+        break;
+      case 3:
+        koszt_okres =  "SUM(koszty.rok_nowych_taryf_3) as koszt";
+        break;
+    }
     let query =
       " SELECT" +
       " popyt_wariant_odbiorcy.grupy_odbiorcow_id as grupy_odbiorcow_id" +
@@ -115,30 +152,63 @@ class DBAccess {
     DB.execute(query, res);
   }
 
-  static SelectKoszty(res, req) {
-    Log(0, "SelectGrupaWspolczynnik received req.body=", req.body);
-    let query =
-      " SELECT" +
-      " elementy_przychodow_dict.id as elementy_przychodow_id" +
-      " , SUM(koszty.rok_obrachunkowy_1) as rok_obrachunkowy_1" +
-      " , SUM(koszty.rok_obrachunkowy_2) as rok_obrachunkowy_2" +
-      " , SUM(koszty.rok_obrachunkowy_3) as rok_obrachunkowy_3" +
-      " , SUM(koszty.rok_nowych_taryf_1) as rok_nowych_taryf_1" +
-      " , SUM(koszty.rok_nowych_taryf_2) as rok_nowych_taryf_2" +
-      " , SUM(koszty.rok_nowych_taryf_3) as rok_nowych_taryf_3" +
-      " FROM" +
-      " elementy_przychodow_dict JOIN koszty_rodzaje ON elementy_przychodow_dict.id = koszty_rodzaje.elementy_przychodow_id" +
-      " ,koszty" +
-      " WHERE" +
-      " koszty.wniosek_id =" +
-      DB.escape(req.body.wniosek_id) +
-      " AND koszty.koszty_rodzaje_id = koszty_rodzaje.id" +
-      // " AND koszty_rodzaje.typ_id =" +
-      // DB.escape(req.body.typ_id) +
-      " GROUP BY koszty_rodzaje.elementy_przychodow_id";
+  // static SelectKoszty(res, req) {
+  //   Log(0, "SelectGrupaWspolczynnik received req.body=", req.body);
+  //   let koszt_okres = "";
+  //   switch(req.body.okres_id)
+  //   {
+  //     case 1:
+  //       koszt_okres =  "SUM(koszty.rok_nowych_taryf_1) as koszt";
+  //       break;
+  //     case 2:
+  //       koszt_okres =  "SUM(koszty.rok_nowych_taryf_2) as koszt";
+  //       break;
+  //     case 3:
+  //       koszt_okres =  "SUM(koszty.rok_nowych_taryf_3) as koszt";
+  //       break;
+  //   }
+  //   let query =
+  //     " SELECT" +
+  //     " elementy_przychodow_dict.id as elementy_przychodow_id" +
+  //     koszt_okres +
+  //     " FROM" +
+  //     " elementy_przychodow_dict JOIN koszty_rodzaje ON elementy_przychodow_dict.koszty_rodzaje_id = koszty_rodzaje.id" +
+  //     " ,koszty" +
+  //     " WHERE" +
+  //     " koszty.wniosek_id =" +
+  //     DB.escape(req.body.wniosek_id) +
+  //     " AND koszty.koszty_rodzaje_id = koszty_rodzaje.id" +
+  //     // " AND koszty_rodzaje.typ_id =" +
+  //     // DB.escape(req.body.typ_id) +
+  //     " GROUP BY koszty_rodzaje.elementy_przychodow_id";
 
-    DB.execute(query, res);
-  }
+  //   DB.execute(query, res);
+  // }
+  // static SelectKoszty(res, req) {
+  //   Log(0, "SelectGrupaWspolczynnik received req.body=", req.body);
+  //   let query =
+  //     " SELECT" +
+  //     " elementy_przychodow_dict.id as elementy_przychodow_id" +
+  //     " , SUM(koszty.rok_obrachunkowy_1) as rok_obrachunkowy_1" +
+  //     " , SUM(koszty.rok_obrachunkowy_2) as rok_obrachunkowy_2" +
+  //     " , SUM(koszty.rok_obrachunkowy_3) as rok_obrachunkowy_3" +
+  //     " , SUM(koszty.rok_nowych_taryf_1) as rok_nowych_taryf_1" +
+  //     " , SUM(koszty.rok_nowych_taryf_2) as rok_nowych_taryf_2" +
+  //     " , SUM(koszty.rok_nowych_taryf_3) as rok_nowych_taryf_3" +
+  //     " FROM" +
+  //     " elementy_przychodow_dict JOIN koszty_rodzaje ON elementy_przychodow_dict.koszty_rodzaje_id = koszty_rodzaje.id" +
+  //     " ,koszty" +
+  //     " WHERE" +
+  //     " koszty.wniosek_id =" +
+  //     DB.escape(req.body.wniosek_id) +
+  //     " AND koszty.koszty_rodzaje_id = koszty_rodzaje.id" +
+  //     // " AND koszty_rodzaje.typ_id =" +
+  //     // DB.escape(req.body.typ_id) +
+  //     " GROUP BY koszty_rodzaje.elementy_przychodow_id";
+
+  //   DB.execute(query, res);
+  // }
+  
   static Update(res, req) {
     Log(0, "Update received req.body=", req.body);
     let query =

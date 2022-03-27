@@ -27,6 +27,14 @@ class DB {
         database: "envikons_taryfy",
         multipleStatements: true,
       };
+      // return {
+      //   host: "localhost",
+      //   user: "root",
+      //   password: "",
+      //   database: "envi_taryfy",
+      //   port: "3306",
+      //   multipleStatements: true,
+      // };
   }
   private _counter: number;
   constructor() {
@@ -156,7 +164,7 @@ class DB {
               connection.end();
               //Log(0, "DB.execute fields: ", fields);
               if (error) {
-                Log(0, "DB.executeAsync in " + counter + " error: ", error);
+                Log(0, "DB.executeAsync in" + counter + " error: ", error);
                 rejectionFunc(error);
               } else {
                 Log(0, "DB.executeAsync in " + counter + " results: ", result);

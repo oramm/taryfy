@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS popyt_wariant_odbiorcy;
 DROP TABLE IF EXISTS grupy_odbiorcow;
 DROP TABLE IF EXISTS popyt_warianty;
 DROP TABLE IF EXISTS popyt_element_sprzedazy;
-DROP TABLE IF EXISTS popyt_typ_dict;
 DROP TABLE IF EXISTS elementy_przychodow_dict;
+DROP TABLE IF EXISTS popyt_typ_dict;
 DROP TABLE IF EXISTS koszty;
 DROP TABLE IF EXISTS koszty_rodzaje;
 DROP TABLE IF EXISTS koszty_wskazniki;
@@ -99,56 +99,6 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO popyt_typ_dict(id,typ) values (1,"woda");
 INSERT INTO popyt_typ_dict(id,typ) values (2,"scieki");
 
-CREATE TABLE elementy_przychodow_dict
-(
-  id int NOT NULL AUTO_INCREMENT primary KEY,
-  typ_id int NOT NULL,
-  FOREIGN KEY (typ_id)
-        REFERENCES popyt_typ_dict(id),
-  poziom int,
-  nazwa varchar(255) NOT NULL
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"1) koszty eksploatacji i utrzymania, w  tym:");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,1,"a) koszty bezpośrednie");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– amortyzacja lub odpisy umorzeniowe");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– wynagrodzenie z narzutami");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– materiały");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– energia");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– opłaty za korzystanie ze środowiska");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– opłaty za usługi wodne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– usługi obce");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– pozostałe koszty");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,1,"b) koszty pośrednie");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– rozliczenie kosztów wydziałowych i działalności pomocniczej");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,2,"– alokowane koszty ogólne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"2) odsetki od zaciągniętych kredytów i pożyczek lub wyemitowanych obligacji");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"3) należności nieregularne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"4) raty kapitałowe ponad wartość amortyzacji lub umorzenia oraz koszty nabycia własnych akcji lub udziałów w celu umorzenia lub koszty spłaty kredytów i pożyczek zaciągniętych w celu sfinansowania takiego umorzenia");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"5) marża zysku");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"6) niepodzielony zysk z lat ubiegłych2)");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (1,0,"7) wartość niezbędnych przychodów");
-
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"1) koszty eksploatacji i utrzymania, w  tym:");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,1,"a) koszty bezpośrednie");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– amortyzacja lub odpisy umorzeniowe");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– wynagrodzenie z narzutami");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– materiały");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– energia");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– opłaty za korzystanie ze środowiska");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– opłaty za usługi wodne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– usługi obce");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– pozostałe koszty");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,1,"b) koszty pośrednie");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– rozliczenie kosztów wydziałowych i działalności pomocniczej");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,2,"– alokowane koszty ogólne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"2) odsetki od zaciągniętych kredytów i pożyczek lub wyemitowanych obligacji");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"3) należności nieregularne");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"4) raty kapitałowe ponad wartość amortyzacji lub umorzenia oraz koszty nabycia własnych akcji lub udziałów w celu umorzenia lub koszty spłaty kredytów i pożyczek zaciągniętych w celu sfinansowania takiego umorzenia");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"5) marża zysku");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"6) niepodzielony zysk z lat ubiegłych2)");
-INSERT INTO elementy_przychodow_dict(typ_id,poziom,nazwa) values (2,0,"7) wartość niezbędnych przychodów");
-
 CREATE TABLE koszty_typ_dict
 (
   id int NOT NULL primary KEY,
@@ -219,6 +169,58 @@ INSERT INTO koszty_rodzaje(id,typ_id,nazwa) values (20,2,"6) niepodzielony zysk 
 INSERT INTO koszty_rodzaje(id,typ_id,nazwa) values (21,2,"7) wartość niezbędnych przychodów");
 INSERT INTO koszty_rodzaje(id,typ_id,nazwa) values (22,2,"Średnia zmiana wartości przychodów –odprowadzanie ścieków w %");
 
+CREATE TABLE elementy_przychodow_dict
+(
+  id int NOT NULL AUTO_INCREMENT primary KEY,
+  typ_id int NOT NULL,
+  FOREIGN KEY (typ_id)
+        REFERENCES popyt_typ_dict(id),
+  poziom int,
+  koszty_rodzaje_id int NOT NULL,
+  nazwa varchar(255) NOT NULL
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0, 1,"1) koszty eksploatacji i utrzymania, w  tym:");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,1, 2,"a) koszty bezpośrednie");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 3,"– amortyzacja lub odpisy umorzeniowe");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 4,"– wynagrodzenie z narzutami");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 5,"– materiały");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 6,"– energia");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 7,"– opłaty za korzystanie ze środowiska");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 8,"– opłaty za usługi wodne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2, 9,"– usługi obce");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2,10,"– pozostałe koszty");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,1,13,"b) koszty pośrednie");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2,14,"– rozliczenie kosztów wydziałowych i działalności pomocniczej");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,2,15,"– alokowane koszty ogólne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,16,"2) odsetki od zaciągniętych kredytów i pożyczek lub wyemitowanych obligacji");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,17,"3) należności nieregularne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,18,"4) raty kapitałowe ponad wartość amortyzacji lub umorzenia oraz koszty nabycia własnych akcji lub udziałów w celu umorzenia lub koszty spłaty kredytów i pożyczek zaciągniętych w celu sfinansowania takiego umorzenia");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,19,"5) marża zysku");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,20,"6) niepodzielony zysk z lat ubiegłych2)");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (1,0,21,"7) wartość niezbędnych przychodów");
+
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0, 1,"1) koszty eksploatacji i utrzymania, w  tym:");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,1, 2,"a) koszty bezpośrednie");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 3,"– amortyzacja lub odpisy umorzeniowe");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 4,"– wynagrodzenie z narzutami");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 5,"– materiały");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 6,"– energia");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 7,"– opłaty za korzystanie ze środowiska");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 8,"– opłaty za usługi wodne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2, 9,"– usługi obce");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2,10,"– pozostałe koszty");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,1,13,"b) koszty pośrednie");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2,14,"– rozliczenie kosztów wydziałowych i działalności pomocniczej");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,2,15,"– alokowane koszty ogólne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,16,"2) odsetki od zaciągniętych kredytów i pożyczek lub wyemitowanych obligacji");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,17,"3) należności nieregularne");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,18,"4) raty kapitałowe ponad wartość amortyzacji lub umorzenia oraz koszty nabycia własnych akcji lub udziałów w celu umorzenia lub koszty spłaty kredytów i pożyczek zaciągniętych w celu sfinansowania takiego umorzenia");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,19,"5) marża zysku");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,20,"6) niepodzielony zysk z lat ubiegłych2)");
+INSERT INTO elementy_przychodow_dict(typ_id,poziom,koszty_rodzaje_id,nazwa) values (2,0,21,"7) wartość niezbędnych przychodów");
+
 CREATE TABLE koszty_wskazniki
 (
   id int NOT NULL AUTO_INCREMENT primary KEY,
@@ -243,7 +245,7 @@ CREATE TABLE koszty
         REFERENCES wnioski(id)
         ON DELETE CASCADE,
   koszty_rodzaje_id int NOT NULL, -- koszty_rodzaje.id
-  typ_id int NOT NULL, -- koszty_rodzaje.,typ_id)
+  typ_id int NOT NULL, -- koszty_rodzaje.typ_id)
   rok_obrachunkowy_1 DECIMAL(16,3),
   rok_obrachunkowy_2 DECIMAL(16,3),
   rok_obrachunkowy_3 DECIMAL(16,3),
@@ -299,7 +301,7 @@ CREATE TABLE grupy_odbiorcow
   przychody_scieki DECIMAL(16,3),
   liczba_odbiorcow_1 int,
   liczba_odbiorcow_2 int,
-  liczba_odbiorcow_3 int
+  liczba_odbiorcow_3 int,
   liczba_odbiorcow_scieki_1 int,
   liczba_odbiorcow_scieki_2 int,
   liczba_odbiorcow_scieki_3 int
@@ -324,7 +326,6 @@ CREATE TABLE popyt_wariant_odbiorcy
   wspolczynnik_alokacji DECIMAL(16,3),
   oplaty_abonament DECIMAL(16,3),
   wspolczynnik_alokacji_abonament DECIMAL(16,3),
-  typ int,
   liczba_odbiorcow int
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -341,6 +342,8 @@ CREATE TABLE popyt_wariant_sumy
         REFERENCES okresy_dict(id),
   sprzedaz DECIMAL(16,3),
   oplaty_abonament DECIMAL(16,3),
+  typ_alokacji_abonament int,
+  dopelnienie_grupa int,
   wskaznik DECIMAL(16,3)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

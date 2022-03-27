@@ -320,6 +320,7 @@ class Screen020 extends Component<Props, State> {
       <MDBModal
         isOpen={this.state.modal_koszt_on}
         toggle={this.modalRodzajKosztowOff}
+        overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}
       >
         <MDBModalHeader toggle={this.modalRodzajKosztowOff}>
           {this.state.modal_koszt_label}

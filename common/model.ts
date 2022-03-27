@@ -207,6 +207,12 @@ export type ElementSprzedazy = {
   wariant_id: number;
 };
 
+enum LiczenieAbonamentu {
+  wskaznik,
+  dopelnienie,
+  procent,
+}
+
 export type WariantSymulacji = {
   id: number;
   nazwa: string;

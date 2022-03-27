@@ -27,10 +27,10 @@ enum CalcChangeSource {
   abonament_wspolczynnik,
 }
 
-export enum LiczenieAbonamentu {
-  wskaznik,
-  dopelnienie,
-  procent,
+enum LiczenieAbonamentu {
+  wskaznik = 1,
+  dopelnienie = 2,
+  procent = 3,
 }
 
 export type WariantSymulacjiGrupy = {
@@ -46,7 +46,6 @@ export type WariantSymulacjiGrupy = {
   oplaty_abonament: number;
   oplaty_abonament_wspolczynnik_a: number;
   suma: number;
-  typ_alokacji_abonament: LiczenieAbonamentu;
   liczba_odbiorcow: number;
 };
 
@@ -61,6 +60,8 @@ type WariantSymulacjiSumy = {
   oplaty_abonament_roznica: number;
   wspolczynnik_alokacji_abonament: number;
   wskaznik: number;
+  typ_alokacji_abonament: LiczenieAbonamentu;
+  dopelnienie_grupa: number
 };
 
 type Props = {
@@ -299,6 +300,9 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
             oplaty_abonament_roznica: 0,
             wspolczynnik_alokacji_abonament: 0,
             wskaznik: 1,
+            typ_alokacji_abonament: item.typ_alokacji_abonament,
+            dopelnienie_grupa: item.dopelnienie_grupa,
+          
           });
         });
         this.setState(
@@ -315,17 +319,30 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
     );
   };
 
-  onLiczenieAbonementu = (index: number, typ_liczenia: LiczenieAbonamentu) => {
+  onLiczenieAbonementu = (typ_liczenia: LiczenieAbonamentu) => {
     this.setState(
       (previousState) =>
         update(previousState, {
-          grupy: {
-            [index]: {
-              typ_alokacji_abonament: { $set: typ_liczenia },
-              oplaty_abonament: { $set: 0 },
-              oplaty_abonament_wspolczynnik_a: { $set: 0 }
-            },
-          },
+          sumy: { [this.state.suma_wybrana]: {
+            typ_alokacji_abonament: { $set: typ_liczenia },
+            // oplaty_abonament: { $set: 0 },
+            // oplaty_abonament_wspolczynnik_a: { $set: 0 },
+          }},
+        }),
+      () => {
+        console.log("modalWariant OnLiczenieAbonementu state:", this.state);
+        this.Calculate(CalcChangeSource.abonament_procent);
+      }
+    );
+  };
+
+  onGrupaDopelnienie = (grupa_id: number) => {
+    this.setState(
+      (previousState) =>
+        update(previousState, {
+          sumy: { [this.state.suma_wybrana]:{
+            dopelnienie_grupa: { $set: grupa_id },
+          }},
         }),
       () => {
         console.log("modalWariant OnLiczenieAbonementu state:", this.state);
@@ -391,35 +408,36 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
           change_source === CalcChangeSource.abonament_wartosc_docelowa ||
           change_source === CalcChangeSource.abonament_procent
         ) {
-          if (grupa.typ_alokacji_abonament === LiczenieAbonamentu.procent) {
-            if (this.state.sumy)
-              grupa.oplaty_abonament =
-                (grupa.oplaty_abonament_wspolczynnik_a *
-                  this.state.sumy[this.state.suma_wybrana]
-                    .oplaty_abonament_docelowa) /
-                100;
-          } else if (
-            grupa.typ_alokacji_abonament === LiczenieAbonamentu.wskaznik
-          ) {
-            if (this.state.sumy)
-              grupa.oplaty_abonament_wspolczynnik_a =
-                grupa.sprzedaz_wspolczynnik_alokacji *
-                this.state.sumy[this.state.suma_wybrana].wskaznik;
-          } else if (
-            grupa.typ_alokacji_abonament === LiczenieAbonamentu.dopelnienie
-          ) {
-            let sum1 = 0;
-            let sum2 = 0;
-            this.mapWariantSymulacjiGrupy(
-              (grupa2: WariantSymulacjiGrupy, index2: number) => {
-                if (index2 <= index)
-                  sum1 += grupa2.sprzedaz_wspolczynnik_alokacji;
-                else sum2 += grupa2.sprzedaz_wspolczynnik_alokacji;
-              }
-            );
-            grupa.oplaty_abonament_wspolczynnik_a =
-              (grupa.sprzedaz_wspolczynnik_alokacji / sum1) * (1 - sum2);
-          }
+          //##########################
+          // if (grupa.typ_alokacji_abonament === LiczenieAbonamentu.procent) {
+          //   if (this.state.sumy)
+          //     grupa.oplaty_abonament =
+          //       (grupa.oplaty_abonament_wspolczynnik_a *
+          //         this.state.sumy[this.state.suma_wybrana]
+          //           .oplaty_abonament_docelowa) /
+          //       100;
+          // } else if (
+          //   grupa.typ_alokacji_abonament === LiczenieAbonamentu.wskaznik
+          // ) {
+          //   if (this.state.sumy)
+          //     grupa.oplaty_abonament_wspolczynnik_a =
+          //       grupa.sprzedaz_wspolczynnik_alokacji *
+          //       this.state.sumy[this.state.suma_wybrana].wskaznik;
+          // } else if (
+          //   grupa.typ_alokacji_abonament === LiczenieAbonamentu.dopelnienie
+          // ) {
+          //   let sum1 = 0;
+          //   let sum2 = 0;
+          //   this.mapWariantSymulacjiGrupy(
+          //     (grupa2: WariantSymulacjiGrupy, index2: number) => {
+          //       if (index2 <= index)
+          //         sum1 += grupa2.sprzedaz_wspolczynnik_alokacji;
+          //       else sum2 += grupa2.sprzedaz_wspolczynnik_alokacji;
+          //     }
+          //   );
+          //   grupa.oplaty_abonament_wspolczynnik_a =
+          //     (grupa.sprzedaz_wspolczynnik_alokacji / sum1) * (1 - sum2);
+          // }
         }
         //todo: move it out of loop, here only collect data
         this.setState(
@@ -499,7 +517,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
     if (!this.state.sumy || this.state.sumy.length === 0) return <></>;
     else
       return (
-        <MDBModal isOpen={true} className="modal-fluid background">
+        <MDBModal isOpen={true}  size="lg" centered overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
           <MDBModalHeader>
             {this.props.wariant_symulacji_id === -1
               ? "Dodaj nowy wariant symulacji"
@@ -547,28 +565,35 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                 </tr>
                 <tr>
                   <td>
-                    {OkresyControl((index, value) => {
-                      console.log("OkresyControl value:", value);
-                      this.selectGrupaOdbiorcow(index + 1);
-                      this.selectSuma(index + 1);
-                    }, this.state.wariant_okres_id)}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <MDBTable bordered className="wariant">
+                    <MDBTable borderless>
                       <MDBTableBody>
                         <tr>
-                          <th></th>
-                          <th>
-                            sprzedaż, m<sup>3</sup>
-                          </th>
-                          <th>A, %</th>
-                          <th>opłaty ab., zł</th>
-                          <th>B, %</th>
-                          <th>suma, zł</th>
-                          <th>
-                            wg wskaźnika
+                          <td>
+                            {OkresyControl((index, value) => {
+                              console.log("OkresyControl value:", value);
+                              this.selectGrupaOdbiorcow(index + 1);
+                              this.selectSuma(index + 1);
+                            }, this.state.wariant_okres_id)}
+                          </td>
+                          <td>
+                            <MDBInput
+                              checked={
+                                Number(
+                                  this.state.sumy[this.state.suma_wybrana].typ_alokacji_abonament
+                                ) === LiczenieAbonamentu.wskaznik
+                                  ? true
+                                  : false
+                              }
+                              type="radio"
+                              onClick={() =>
+                                this.onLiczenieAbonementu(
+                                  LiczenieAbonamentu.wskaznik
+                                )
+                              }
+                            />
+                          </td>
+                          <td>wg wskaźnika</td>
+                          <td>
                             <MDBInput
                               noTag
                               className="text-right"
@@ -599,14 +624,71 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   );
                               }}
                             />
+                          </td>
+                          <td>
+                            <MDBInput
+                              checked={
+                                Number(
+                                  this.state.sumy[this.state.suma_wybrana].typ_alokacji_abonament
+                                ) === LiczenieAbonamentu.dopelnienie
+                                  ? true
+                                  : false
+                              }
+                              type="radio"
+                              onClick={() =>
+                                this.onLiczenieAbonementu(
+                                  LiczenieAbonamentu.dopelnienie
+                                )
+                              }
+                            />
+                          </td>
+                          <td>jako dopełnienie</td>
+                          <td>
+                            <MDBInput
+                              checked={
+                                Number(
+                                  this.state.sumy[this.state.suma_wybrana].typ_alokacji_abonament
+                                ) === LiczenieAbonamentu.procent
+                                  ? true
+                                  : false
+                              }
+                              type="radio"
+                              onClick={() =>
+                                this.onLiczenieAbonementu(
+                                  LiczenieAbonamentu.procent
+                                )
+                              }
+                            />
+                          </td>
+                          <td>jako % z całości</td>
+                        </tr>
+                      </MDBTableBody>
+                    </MDBTable>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <MDBTable bordered className="wariant">
+                      <MDBTableBody>
+                        <tr>
+                          <th></th>
+                          <th>
+                            sprzedaż, m<sup>3</sup>
                           </th>
-                          <th>jako dopełnienie</th>
-                          <th>jako % z całości</th>
-                          {/* <th>liczba odbiorców</th> */}
+                          <th>A, %</th>
+                          <th>opłaty ab., zł</th>
+                          <th>B, %</th>
+                          <th>suma, zł</th>
+                          {this.state.sumy[this.state.suma_wybrana].typ_alokacji_abonament ===
+                          LiczenieAbonamentu.dopelnienie ? (
+                            <th>dopełnienie</th>
+                          ) : (
+                            <></>
+                          )}
                         </tr>
                         {this.state.grupy_wybrane.map((item, index) => (
                           <tr key={index}>
-                            <th>{this.state.grupy[item].nazwa}</th>
+                            <td>{this.state.grupy[item].nazwa}</td>
                             <td>
                               <MDBInput
                                 noTag
@@ -719,9 +801,10 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                             update(prevState, {
                                               grupy: {
                                                 [item]: {
-                                                  oplaty_abonament_wspolczynnik_a: {
-                                                    $set: Number(value),
-                                                  },
+                                                  oplaty_abonament_wspolczynnik_a:
+                                                    {
+                                                      $set: Number(value),
+                                                    },
                                                 },
                                               },
                                             }),
@@ -739,69 +822,30 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                                   />
                                 </td>
                                 <td>{this.state.grupy[item].suma}</td>
-                                <td
-                                  onClick={() =>
-                                    this.onLiczenieAbonementu(
-                                      item,
-                                      LiczenieAbonamentu.wskaznik
-                                    )
-                                  }
-                                >
-                                  <MDBInput
-                                    checked={
-                                      Number(
-                                        this.state.grupy[item]
-                                          .typ_alokacji_abonament
-                                      ) === LiczenieAbonamentu.wskaznik
-                                        ? true
-                                        : false
-                                    }
-                                    type="radio"
-                                    id={"liczenie_abonamentu_" + index}
-                                  />
-                                </td>
-                                <td
-                                  onClick={() =>
-                                    this.onLiczenieAbonementu(
-                                      item,
-                                      LiczenieAbonamentu.dopelnienie
-                                    )
-                                  }
-                                >
-                                  <MDBInput
-                                    checked={
-                                      Number(
-                                        this.state.grupy[item]
-                                          .typ_alokacji_abonament
-                                      ) === LiczenieAbonamentu.dopelnienie
-                                        ? true
-                                        : false
-                                    }
-                                    type="radio"
-                                    id={"liczenie_abonamentu_" + index}
-                                  />
-                                </td>
-                                <td
-                                  onClick={() =>
-                                    this.onLiczenieAbonementu(
-                                      item,
-                                      LiczenieAbonamentu.procent
-                                    )
-                                  }
-                                >
-                                  <MDBInput
-                                    checked={
-                                      Number(
-                                        this.state.grupy[item]
-                                          .typ_alokacji_abonament
-                                      ) === LiczenieAbonamentu.procent
-                                        ? true
-                                        : false
-                                    }
-                                    type="radio"
-                                    id={"liczenie_abonamentu_" + index}
-                                  />
-                                </td>
+                                {this.state.sumy[this.state.suma_wybrana].typ_alokacji_abonament ===
+                                LiczenieAbonamentu.dopelnienie ? (
+                                  <td>
+                                    <MDBInput
+                                      checked={
+                                        Number(
+                                          this.state.sumy[this.state.suma_wybrana]
+                                            .dopelnienie_grupa
+                                        ) === this.state.grupy[item].grupy_odbiorcow_id_valid
+                                          ? true
+                                          : false
+                                      }
+                                      type="radio"
+                                      id={"liczenie_abonamentu_" + index}
+                                      onClick={() =>
+                                        this.onGrupaDopelnienie(
+                                          this.state.grupy[item].grupy_odbiorcow_id_valid
+                                        )
+                                      }
+                                    />
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
                               </>
                             ) : (
                               <>
@@ -962,7 +1006,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                     </MDBTable>
                   </td>
                 </tr>
-                <tr>
+                {/* <tr>
                   <td>
                     <MDBTable bordered>
                       <MDBTableBody>
@@ -983,7 +1027,7 @@ export default class ModalWariantSymulacji extends Component<Props, State> {
                       </MDBTableBody>
                     </MDBTable>
                   </td>
-                </tr>
+                </tr> */}
               </MDBTableBody>
             </MDBTable>
           </MDBModalBody>

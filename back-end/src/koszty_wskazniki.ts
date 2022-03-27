@@ -2,7 +2,7 @@ const express = require("express");
 
 var router = express.Router();
 
-import { Log } from "./Log";
+import { Log } from "./log";
 import { DB } from "./db_util";
 
 router.post("/select", (req, res) => {

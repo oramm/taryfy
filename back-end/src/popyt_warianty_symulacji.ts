@@ -65,7 +65,6 @@ class PopytWarianty {
       " IFNULL(popyt_wariant_odbiorcy.wspolczynnik_alokacji, 0) as sprzedaz_wspolczynnik_alokacji," +
       " IFNULL(popyt_wariant_odbiorcy.oplaty_abonament, 0) as oplaty_abonament," +
       " IFNULL(popyt_wariant_odbiorcy.wspolczynnik_alokacji_abonament, 0) as oplaty_abonament_wspolczynnik_a," +
-      " IFNULL(popyt_wariant_odbiorcy.typ, 2) as typ_alokacji_abonament," +
       " IFNULL(popyt_wariant_odbiorcy.liczba_odbiorcow, 0) as liczba_odbiorcow" +
       " FROM (okresy_dict, grupy_odbiorcow)" +
       " LEFT JOIN popyt_wariant_odbiorcy ON grupy_odbiorcow.id = popyt_wariant_odbiorcy.grupy_odbiorcow_id" +
@@ -81,11 +80,19 @@ class PopytWarianty {
 
   static SelectSumy(res, req) {
     let query =
-      "SELECT popyt_wariant_sumy.id, okresy_dict.id as okres_id," +
-      DB.escape(req.body.wariant_id) +
-      " as wariant_id, IFNULL(popyt_wariant_sumy.sprzedaz,0) AS sprzedaz, IFNULL(popyt_wariant_sumy.oplaty_abonament,0) AS oplaty_abonament FROM okresy_dict LEFT JOIN popyt_wariant_sumy" +
-      " ON okresy_dict.id = popyt_wariant_sumy.okres_id AND popyt_wariant_sumy.wariant_id=" +
-      DB.escape(req.body.wariant_id);
+      "SELECT "
+      + " popyt_wariant_sumy.id"
+      + ", okresy_dict.id as okres_id"
+      + ", " + DB.escape(req.body.wariant_id) + " AS wariant_id"
+      + ", IFNULL(popyt_wariant_sumy.sprzedaz,0) AS sprzedaz"
+      + ", IFNULL(popyt_wariant_sumy.oplaty_abonament, 0) AS oplaty_abonament"
+      + ", IFNULL(popyt_wariant_sumy.typ_alokacji_abonament, 0) AS typ_alokacji_abonament"
+      + ", IFNULL(popyt_wariant_sumy.dopelnienie_grupa, 0) AS dopelnienie_grupa"
+      + " FROM okresy_dict"
+      + " LEFT JOIN popyt_wariant_sumy"
+      + " ON okresy_dict.id = popyt_wariant_sumy.okres_id"
+      + " AND popyt_wariant_sumy.wariant_id="
+      + DB.escape(req.body.wariant_id);
     DB.execute(query, res);
   }
 
@@ -107,17 +114,17 @@ class PopytWarianty {
     );
     return (
       "INSERT INTO popyt_wariant_odbiorcy"
-      + "(wariant_id, grupy_odbiorcow_id, okres_id, sprzedaz, wspolczynnik_alokacji, oplaty_abonament,"
-      + " wspolczynnik_alokacji_abonament, typ, liczba_odbiorcow) VALUES ("
+      + " (wariant_id, grupy_odbiorcow_id, okres_id, \
+          sprzedaz, wspolczynnik_alokacji, oplaty_abonament,"
+      + " wspolczynnik_alokacji_abonament, liczba_odbiorcow) VALUES ("
       + wariant_id
-      + "," + DB.escape(data.grupy_odbiorcow_id_valid)
-      + "," + DB.escape(data.okresy_dict_id)
-      + "," + DB.escape(data.sprzedaz)
-      + "," + DB.escape(data.sprzedaz_wspolczynnik_alokacji)
-      + "," + DB.escape(data.oplaty_abonament)
-      + "," + DB.escape(data.oplaty_abonament_wspolczynnik_a)
-      + ',"' + DB.escape(data.typ_alokacji_abonament)
-      + '",' + DB.escape(data.liczba_odbiorcow)
+      + " ," + DB.escape(data.grupy_odbiorcow_id_valid)
+      + " ," + DB.escape(data.okresy_dict_id)
+      + " ," + DB.escape(data.sprzedaz)
+      + " ," + DB.escape(data.sprzedaz_wspolczynnik_alokacji)
+      + " ," + DB.escape(data.oplaty_abonament)
+      + " ," + DB.escape(data.oplaty_abonament_wspolczynnik_a)
+      + " ," + DB.escape(data.liczba_odbiorcow)
       + ")"
     );
   }
@@ -125,17 +132,24 @@ class PopytWarianty {
   static QueryInsertWariantSumy(data, wariant_id) {
     Log(0, "QueryInsertWariantSumy data", data);
     return (
-      "INSERT INTO popyt_wariant_sumy (wariant_id, okres_id, sprzedaz, oplaty_abonament, wskaznik) VALUES (" +
-      wariant_id +
-      "," +
-      DB.escape(data.okres_id) +
-      "," +
-      DB.escape(data.sprzedaz_docelowa) +
-      "," +
-      DB.escape(data.oplaty_abonament_docelowa) +
-      "," +
-      DB.escape(data.wskaznik) +
-      ")"
+      "INSERT INTO popyt_wariant_sumy \
+      (wariant_id, okres_id, sprzedaz, \
+      oplaty_abonament, typ_alokacji_abonament, \
+      dopelnienie_grupa, wskaznik) VALUES ("
+      + wariant_id
+      + "," 
+      + DB.escape(data.okres_id) 
+      + "," 
+      + DB.escape(data.sprzedaz_docelowa) 
+      + "," 
+      + DB.escape(data.oplaty_abonament_docelowa) 
+      + "," 
+      + (DB.escape(data.typ_alokacji_abonament) === "NULL" ? "0" : DB.escape(data.typ_alokacji_abonament))
+      + "," 
+      + (DB.escape(data.dopelnienie_grupa)  === "NULL" ? "0" : DB.escape(data.dopelnienie_grupa))
+      + "," 
+      + DB.escape(data.wskaznik) 
+      + ")"
     );
   }
 

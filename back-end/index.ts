@@ -1,10 +1,3 @@
-//'use strict';
-const express = require("express");
-const app = express();
-var bodyParser = require("body-parser");
-const jwt = require("jsonwebtoken");
-const port = process.env.PORT || 5006;
-
 import { uzytkownicyRouter } from "./src/uzytkownicy";
 import { wnioskiRouter } from "./src/wnioski";
 import { zalozeniaRouter } from "./src/zalozenia";
@@ -20,6 +13,12 @@ import { AlokacjaPrzychodowRouter } from "./src/alokacja_przychodow";
 import { GrupyOdbiorcowRouter } from "./src/grupy_odbiorcow";
 import { WynikiSpreadsheetRouter } from "./src/wyniki";
 import { Log } from "./src/log";
+
+const express = require("express");
+const app = express();
+var bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken");
+const port = process.env.PORT || 5006;
 
 app.use(express.static("public"));
 //support JSON-encoded bodies

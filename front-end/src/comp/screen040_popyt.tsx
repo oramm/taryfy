@@ -118,7 +118,7 @@ export default class Screen extends Component<Props, State> {
           },
           () =>
           {
-            console.log("NSAFE_componentWillReceiveProps update state:", this.state)
+            console.log("UNSAFE_componentWillReceiveProps update state:", this.state)
             this.loadData();
           }
         );
@@ -371,6 +371,7 @@ export default class Screen extends Component<Props, State> {
       <MDBModal
         isOpen={this.state.modal_sprzedaz_on}
         toggle={this.modalElementSprzedarzyOff}
+        overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}
       >
         <MDBModalHeader toggle={this.modalElementSprzedarzyOff}>
           {this.state.modal_sprzedaz_label}

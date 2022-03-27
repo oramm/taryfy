@@ -114,6 +114,7 @@ class Screen extends Component<Props, State> {
   }
 
   render() {
+    let link = this.state.link.replace("&rm=minimal","");
     return (
       <>
         <MDBBtn
@@ -143,7 +144,7 @@ class Screen extends Component<Props, State> {
               </td>
             </tr>
             <tr>
-              <td style={{ padding: 2 }}> <a href={this.state.link} target="_blank">{this.state.link}</a></td>
+              <td style={{ padding: 2 }}> <a href={link} target="_blank">{link}</a></td>
             </tr>
           </MDBTableBody>
         </MDBTable>

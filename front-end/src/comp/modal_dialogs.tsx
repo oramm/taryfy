@@ -1,6 +1,7 @@
 import { Component } from "react";
 import * as React from "react";
 import {
+  MDBContainer,
   MDBModal,
   MDBModalHeader,
   MDBModalBody,
@@ -293,7 +294,8 @@ class ModalDialogsComp extends Component<Props, State> {
 
   modalNazwa() {
     return (
-      <MDBModal isOpen={this.state.modal_nazwa_on} toggle={this.nazwaOff}>
+    <MDBContainer>
+      <MDBModal isOpen={this.state.modal_nazwa_on} toggle={this.nazwaOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.nazwaOff}>
           {this.state.modal_label}
         </MDBModalHeader>
@@ -334,12 +336,13 @@ class ModalDialogsComp extends Component<Props, State> {
           </MDBBtn>
         </MDBModalFooter>
       </MDBModal>
+    </MDBContainer>      
     );
   }
 
   modalOpis() {
     return (
-      <MDBModal isOpen={this.state.modal_opis_on} toggle={this.opisOff}>
+      <MDBModal isOpen={this.state.modal_opis_on} toggle={this.opisOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.opisOff}>
           {this.state.modal_label}
         </MDBModalHeader>
@@ -397,7 +400,7 @@ class ModalDialogsComp extends Component<Props, State> {
 
   modalUsun() {
     return (
-      <MDBModal isOpen={this.state.modal_usun_on} toggle={this.usunOff}>
+      <MDBModal isOpen={this.state.modal_usun_on} toggle={this.usunOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.usunOff}>
           {this.state.modal_label}
         </MDBModalHeader>
@@ -438,6 +441,7 @@ class ModalDialogsComp extends Component<Props, State> {
       <MDBModal
         isOpen={this.state.modal_w_toku_on}
         // toggle={this.wTokuOff}
+        overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}
       >
         <MDBModalBody className="text-center">
           Operacja w toku
@@ -449,7 +453,7 @@ class ModalDialogsComp extends Component<Props, State> {
 
   modalError() {
     return (
-      <MDBModal isOpen={this.state.modal_error_on} toggle={this.errorOff}>
+      <MDBModal isOpen={this.state.modal_error_on} toggle={this.errorOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.errorOff}>Błąd:</MDBModalHeader>
         <MDBModalBody>{this.state.modal_label}</MDBModalBody>
         <MDBModalFooter>
@@ -463,7 +467,7 @@ class ModalDialogsComp extends Component<Props, State> {
 
   modalHaslo() {
     return (
-      <MDBModal isOpen={this.state.modal_haslo_on} toggle={this.hasloOff}>
+      <MDBModal isOpen={this.state.modal_haslo_on} toggle={this.hasloOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.hasloOff}>Zmiana hasła</MDBModalHeader>
         <MDBModalBody>
           <MDBInput

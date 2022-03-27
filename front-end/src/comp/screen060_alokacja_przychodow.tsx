@@ -17,9 +17,14 @@ import {
   GrupaWspolczynnik,
   WspolczynnikAlokacjiSelected,
   GrupyOdbiorcow,
-  ElementPrzychodu,
-  KosztyOgolem,
 } from "../../../common/model";
+
+type ElementPrzychodu = {
+  id: number;
+  poziom: number;
+  nazwa: string;
+  koszt: number;
+};
 
 type Props = {
   wniosek_id: number;
@@ -81,7 +86,9 @@ export default class Screen extends Component<Props, State> {
     post(
       "/alokacja_przychodow/select_elementy_przychodow",
       {
+        wniosek_id: this.props.wniosek_id,
         typ_id: this.props.typ_id,
+        okres_id: this.state.okres_id,
       },
       (response) => {
         console.log("Screen060 loadElementPrzychodu response:", response);
@@ -416,52 +423,36 @@ export default class Screen extends Component<Props, State> {
 
   calculate() {
     let ret: number[][] = [];
-    for (let g = 0; g < this.state.grupy_odbiorcow.length; g++) {
+    for (let grupa = 0; grupa < this.state.grupy_odbiorcow.length; grupa++) {
       let line: number[] = [];
-      for (let e = 0; e < this.state.elementy_przychodow.length; e++) {
+      for (let elementPrzychodu = 0; elementPrzychodu < this.state.elementy_przychodow.length; elementPrzychodu++) {
         line.push(0);
       }
       ret.push(line);
     }
 
-    for (let g = 0; g < this.state.grupy_odbiorcow.length; g++) {
+    for (let grupa = 0; grupa < this.state.grupy_odbiorcow.length; grupa++) {
       let level = [0, 0, 0];
-      let last_level = 0;
+      let previous_level = 0;
       for (
         let index = this.state.elementy_przychodow.length - 1;
         index >= 0;
         index--
       ) {
-        let e: ElementPrzychodu = this.state.elementy_przychodow[index];
-        console.log("screen060_alokacja_przychodow calculate e:", e);
-        if (e.poziom >= last_level) {
-          ret[g][index] = this.getGrupaWspolczynnik(
-            this.state.grupy_odbiorcow[g].id,
-            e
-          );
-          level[e.poziom] += ret[g][index];
+        let elementPrzychodu: ElementPrzychodu = this.state.elementy_przychodow[index];
+        console.log("screen060_alokacja_przychodow calculate elementPrzychodu:", elementPrzychodu);
+        if (elementPrzychodu.poziom >= previous_level) {
+          ret[grupa][index] = this.getGrupaWspolczynnik(
+            this.state.grupy_odbiorcow[grupa].id,
+            elementPrzychodu
+          ) * elementPrzychodu.koszt;
+          level[elementPrzychodu.poziom] += ret[grupa][index];
         } else {
-          ret[g][index] = level[e.poziom + 1];
-          level[e.poziom + 1] = 0;
-          level[e.poziom] += ret[g][index];
+          ret[grupa][index] = level[elementPrzychodu.poziom + 1];
+          level[elementPrzychodu.poziom + 1] = 0;
+          level[elementPrzychodu.poziom] += ret[grupa][index];
         }
-        last_level = e.poziom;
-        // switch (e.poziom) {
-        //   case 0:
-        //   case 1:
-        //     ret[g][index] = level[e.poziom + 1];
-        //     level[e.poziom + 1] = 0;
-        //     level[e.poziom] += ret[g][index];
-        //     break;
-        //   case 2:
-        //     ret[g][index] = this.getGrupaWspolczynnik(this.state.grupy_odbiorcow[g].id, e);
-        //     // ret[g][index] =
-        //     //   this.getOgolem(e) *
-        //     //   this.getGrupaWspolczynnik(this.state.grupy_odbiorcow[g].id, e) *
-        //     //   0.01;
-        //     level[e.poziom] += ret[g][index];
-        //     break;
-        // }
+        previous_level = elementPrzychodu.poziom;
       }
     }
 
@@ -474,8 +465,6 @@ export default class Screen extends Component<Props, State> {
     element_przychodu: ElementPrzychodu
   ) {
     if (this.state.wspolczynnik_alokacji.length) {
-      let wa = this.state.wspolczynnik_alokacji[0];
-
       console.log(
         "screen060_alokacja_przychodow calculate getGrupaWspolczynnik this.state.wspolczynnik_alokacji_selected:",
         this.state.wspolczynnik_alokacji_selected
@@ -490,25 +479,25 @@ export default class Screen extends Component<Props, State> {
             "screen060_alokacja_przychodow calculate getGrupaWspolczynnik this.state.grupa_wspolczynnik",
             this.state.grupa_wspolczynnik
           );
-          for (const g of this.state.grupa_wspolczynnik) {
+          for (const grupa of this.state.grupa_wspolczynnik) {
             if (
-              g.grupy_odbiorcow_id === grupy_odbiorcow_id &&
-              g.popyt_element_sprzedazy_id ===
+              grupa.grupy_odbiorcow_id === grupy_odbiorcow_id &&
+              grupa.popyt_element_sprzedazy_id ===
                 item.popyt_element_sprzedazy_id &&
-              g.popyt_warianty_id === item.popyt_warianty_id
+              grupa.popyt_warianty_id === item.popyt_warianty_id
             ) {
               if (item.abonament) {
                 console.log(
-                  "screen060_alokacja_przychodow calculate getGrupaWspolczynnik g.wspolczynnik_abonament:",
-                  g.wspolczynnik_abonament
+                  "screen060_alokacja_przychodow calculate getGrupaWspolczynnik grupa.wspolczynnik_abonament:",
+                  grupa.wspolczynnik_abonament
                 );
-                return g.wspolczynnik_abonament;
+                return grupa.wspolczynnik_abonament;
               } else {
                 console.log(
-                  "screen060_alokacja_przychodow calculate getGrupaWspolczynnik g.wspolczynnik:",
-                  g.wspolczynnik
+                  "screen060_alokacja_przychodow calculate getGrupaWspolczynnik grupa.wspolczynnik:",
+                  grupa.wspolczynnik
                 );
-                return g.wspolczynnik;
+                return grupa.wspolczynnik;
               }
             }
           }
@@ -518,98 +507,6 @@ export default class Screen extends Component<Props, State> {
     }
     return 0;
   }
-
-  // getGrupaWspolczynnik(
-  //   grupy_odbiorcow_id: number,
-  //   element_przychodu: ElementPrzychodu
-  // ) {
-  //   if (this.state.wspolczynnik_alokacji.length) {
-  //     let wa = this.state.wspolczynnik_alokacji[0];
-
-  //     let wspolczynnik_alokacji_selected = {
-  //       id: 0,
-  //       elementy_przychodow_id: element_przychodu.id,
-  //       popyt_element_sprzedazy_id: wa.popyt_element_sprzedazy_id,
-  //       popyt_warianty_id: wa.popyt_warianty_id,
-  //       abonament: wa.popyt_element_sprzedazy_abonament,
-  //     } as WspolczynnikAlokacjiSelected;
-
-  //     console.log("screen060_alokacja_przychodow calculate getGrupaWspolczynnik this.state.wspolczynnik_alokacji_selected:", this.state.wspolczynnik_alokacji_selected);
-  //     for (const item of this.state.wspolczynnik_alokacji_selected) {
-  //       if (item.elementy_przychodow_id === element_przychodu.id) {
-  //         wspolczynnik_alokacji_selected = item;
-  //       }
-  //     }
-  //     console.log("screen060_alokacja_przychodow calculate getGrupaWspolczynnik wspolczynnik_alokacji_selected:", wspolczynnik_alokacji_selected);
-  //     console.log("screen060_alokacja_przychodow calculate getGrupaWspolczynnik this.state.grupa_wspolczynnik", this.state.grupa_wspolczynnik);
-  //     for (const g of this.state.grupa_wspolczynnik) {
-  //       if (
-  //         g.grupy_odbiorcow_id === grupy_odbiorcow_id
-  //         && g.popyt_element_sprzedazy_id === wspolczynnik_alokacji_selected.popyt_element_sprzedazy_id
-  //         && g.popyt_warianty_id === wspolczynnik_alokacji_selected.popyt_warianty_id
-  //         //&& wspolczynnik_alokacji_selected.abonament === g.popyt_element_sprzedazy_abonament
-  //       ) {
-  //         if (g.popyt_element_sprzedazy_abonament === true) {
-  //           console.log("screen060_alokacja_przychodow calculate getGrupaWspolczynnik g.wspolczynnik_abonament:", g.wspolczynnik_abonament);
-  //           return g.wspolczynnik_abonament;
-  //         } else {
-  //           console.log("screen060_alokacja_przychodow calculate getGrupaWspolczynnik g.wspolczynnik:", g.wspolczynnik);
-  //           return g.wspolczynnik;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return 0;
-  // }
-
-  // getOgolem(elementy_przychodow: ElementPrzychodu) {
-  //   console.log("screen060_alokacja_przychodow getOgolem this.state.koszty_ogolem:", this.state.koszty_ogolem);
-  //   console.log("screen060_alokacja_przychodow getOgolem elementy_przychodow.id:", elementy_przychodow.id);
-  //   let koszt = this.state.koszty_ogolem.find(
-  //     (item: KosztyOgolem, index: number) => {
-  //       return item.elementy_przychodow_id === elementy_przychodow.id;
-  //     }
-  //   );
-  //   console.log("screen060_alokacja_przychodow getOgolem koszt:", koszt);
-  //   let value = 0;
-  //   if (typeof koszt != "undefined")
-  //     switch (this.state.okres_id) {
-  //       case 1:
-  //         value = koszt.rok_nowych_taryf_1;
-  //         break;
-  //       case 2:
-  //         value = koszt.rok_nowych_taryf_2;
-  //         break;
-  //       case 3:
-  //         value = koszt.rok_nowych_taryf_3;
-  //         break;
-  //     }
-  //   console.log("screen060_alokacja_przychodow getOgolem value:", value);
-  //   return value;
-
-  //   // let koszt = {} as KosztyOgolem;
-  //   // let koszt_set: boolean = false;
-  //   // this.state.koszty_ogolem.forEach((item: KosztyOgolem, index: number) => {
-  //   //   if (item.elementy_przychodow_id === elementy_przychodow.id) {
-  //   //     koszt = item;
-  //   //     koszt_set = true;
-  //   //   }
-  //   // });
-  //   // let value = 0;
-  //   // if (koszt_set)
-  //   //   switch (this.state.okres_id) {
-  //   //     case 1:
-  //   //       value = koszt.rok_nowych_taryf_1;
-  //   //       break;
-  //   //     case 2:
-  //   //       value = koszt.rok_nowych_taryf_2;
-  //   //       break;
-  //   //     case 3:
-  //   //       value = koszt.rok_nowych_taryf_3;
-  //   //       break;
-  //   //   }
-  //   // return value;
-  // }
 
   zestawienie() {
     // if (
@@ -647,7 +544,6 @@ export default class Screen extends Component<Props, State> {
           </tr>
         </MDBTableHead>
         <MDBTableBody style={{ width: "100%" }}>
-          {console.log("zestawienie dupa")}
           {this.state.elementy_przychodow.map(
             (
               element_przychodu: ElementPrzychodu,
@@ -682,7 +578,7 @@ export default class Screen extends Component<Props, State> {
                           temp_wartosc =
                             wartosc[grupa_odbiorcow_index][
                               element_przychodu_index
-                            ];
+                            ] * element_przychodu.koszt;
 
                         ogolem += temp_wartosc;
                         console.log(
@@ -701,13 +597,13 @@ export default class Screen extends Component<Props, State> {
 
                         return (
                           <td>
-                            {Math.round(temp_wartosc * 100 + Number.EPSILON) /
+                            {Math.round(temp_wartosc + Number.EPSILON) /
                               100}
                           </td>
                         );
                       }
                     )}
-                  <td>{Math.round(ogolem * 100 + Number.EPSILON) / 100}</td>
+                  <td>{Math.round(ogolem + Number.EPSILON) / 100}</td>
                 </tr>
               );
             }
@@ -809,6 +705,8 @@ export default class Screen extends Component<Props, State> {
         >
           Zapisz
         </MDBBtn>
+        {this.state.okres_id === 0 ?
+        <></> :
         <MDBBtn
           size="sm"
           className="float-left"
@@ -819,6 +717,7 @@ export default class Screen extends Component<Props, State> {
         >
           Zapisz i kopiuj na pozostałe okresy
         </MDBBtn>
+        }
       </>
     );
   }

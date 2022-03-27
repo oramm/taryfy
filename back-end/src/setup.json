@@ -1,8 +1,16 @@
 {
-    "host": "localhost",
-    "user": "root",
-    "password": "",
-    "database": "envi_taryfy",
-    "port": "3306",
-    "multipleStatements": true
-  }
+  "comment": {
+      "host": "localhost",
+      "user": "root",
+      "password": "",
+      "database": "envi_taryfy",
+      "port": "3306",
+      "multipleStatements": true
+  },
+  "host": "localhost",
+  "user": "root",
+  "password": "",
+  "database": "envi_taryfy",
+  "port": "3306",
+  "multipleStatements": true
+}

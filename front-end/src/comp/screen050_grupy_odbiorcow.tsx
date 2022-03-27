@@ -174,7 +174,7 @@ export default class Screen extends Component<Props, State> {
 
   modalGrupyOdbiorcow() {
     return (
-      <MDBModal isOpen={this.state.modal_on} toggle={this.modalOff}>
+      <MDBModal isOpen={this.state.modal_on} toggle={this.modalOff} overflowScroll={false} inline={false} noClickableBodyWithoutBackdrop={false}>
         <MDBModalHeader toggle={this.modalOff}>
           {this.state.modal_label}
         </MDBModalHeader>
